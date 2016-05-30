@@ -1,0 +1,22 @@
+digraph openstack_nova_arch {
+    {
+        client [shape=ellipse label="Client"]
+        api [shape=ellipse label="API"]
+        queue [shape=oval style=filled label="Queue"]
+        compute [shape=ellipse label="Compute"]
+        scheduler [shape=ellipse label="Scheduler"]
+        conductor [shape=ellipse label="Conductor"]
+        db [shape=DatabaseShape peripheries=0 style=filled label="DB"]
+    }
+    client -> api [label="HTTP"]
+    api -> queue
+    queue -> compute
+    compute -> queue
+    queue -> scheduler
+    scheduler -> queue
+    queue -> conductor
+    conductor -> queue
+    conductor -> db
+    scheduler -> db
+    api -> db
+}
