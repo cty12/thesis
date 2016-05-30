@@ -61,15 +61,25 @@
 可以缩小广播域，从而提高集群的安全性。
 
 上文提到的 Amazon EC2 就是一个典型的 IaaS 平台。类似的，OpenStack 也是一个 IaaS 平台，
-截至到 2016 年，一共包含以下几个核心组成部分：
+截至到 2016 年，一共包含以下几个核心组成部分~\cite{openstack}：
 
 \begin{enumerate}
-    \item \textbf{Nova: }虚拟机管理
-    \item \textbf{Neutron: }
-    \item \textbf{Swift: }
-    \item \textbf{Cinder: }
-    \item \textbf{Keystone: }
-    \item \textbf{Glance: }
+    \item \textbf{Nova:} Nova 是 OpenStack 的计算部分，主要负责虚拟机管理。它的 API
+    可以和 Amazon EC2 的相兼容，RackSpace 的商业计算服务就是建立在 Nova 上的。
+    \begin{enumerate}
+        \item \textbf{nova-compute}
+        \item \textbf{nova-scheduler}
+        \item \textbf{nova-conductor}
+        \item \textbf{nova-db}
+        \item \textbf{nova-console}
+        \item \textbf{nova-cert}
+        \item \textbf{nova-objectstore}
+    \end{enumerate}
+    \item \textbf{Neutron:}
+    \item \textbf{Swift:}
+    \item \textbf{Cinder:}
+    \item \textbf{Keystone:}
+    \item \textbf{Glance:}
 \end{enumerate}
 
 
