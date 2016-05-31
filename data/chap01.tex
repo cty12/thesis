@@ -18,7 +18,7 @@
 
 \begin{figure}[h]
     \centering
-    \includegraphics[height=0.5\textwidth]{unix_time_sharing}
+    \includegraphics[width=0.7\textwidth]{unix_time_sharing}
     \caption{威斯康辛大学麦迪逊分校的学生使用终端机，1978 年}
 \end{figure}
 
@@ -60,6 +60,12 @@
 两个交换机，各接入路由器的两个物理端口上。而使用了虚拟局域网，就可以用两个逻辑端口代替。
 使用虚拟局域网，可以缩小广播域，从而提高集群的安全性。
 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{openstack-conceptual-diagram}
+    \caption{OpenStack 的概念架构图（来自 OpenStack 官方电子手册）}
+\end{figure}
+
 上文提到的 Amazon EC2 就是一个典型的 IaaS 平台。类似的，OpenStack 也是一个 IaaS 平台，
 截至到 2016 年，一共包含以下几个核心组成部分~\cite{openstack}：
 
@@ -68,6 +74,11 @@
     可以和 Amazon EC2 的相兼容，RackSpace 和惠普~\cite{hpe-openstack}的商业计算服务
     就是建立在 Nova 上的。Nova 主要包含以下几个组件\footnote{实际上还有 nova-cert
      和 nova-objectstore ，但不是主要的}：
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.7\textwidth]{openstack-nova-arch}
+        \caption{OpenStack Nova 的架构图}
+    \end{figure}
     \begin{enumerate}
         \item \textbf{nova-compute:} 这是 Nova 用来管理虚拟机的模块。它安装在物理集群
         中的每台机器上，主要负责接收用户对虚拟机的操作，例如创建删除等。这些操作依赖底层的
