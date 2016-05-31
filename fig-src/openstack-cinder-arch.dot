@@ -1,0 +1,14 @@
+digraph openstack_cinder_arch {
+    {
+        client [shape=ellipse label="Client"]
+        api [shape=ellipse label="cinder-api" style=filled]
+        scheduler [shape=ellipse label="cinder-scheduler"]
+        volume [shape=ellipse label="cinder-volume"]
+        backup [shape=ellipse label="cinder-backup"]
+    }
+    client -> api [label="REST"]
+    api -> scheduler [label="RPC"]
+    api -> volume [label="RPC"]
+    api -> backup [label="RPC"]
+    scheduler -> volume [label="RPC"]
+}
