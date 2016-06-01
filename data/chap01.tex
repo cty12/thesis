@@ -102,6 +102,11 @@
      neutron-server 运行在网络控制节点上，它接受用户发来的 HTTP 请求，发送给遍布
     物理集群的机器上运行的 agent 进行处理。为了更容易扩展，Neutron 提供 plugin 机制，
     每个 plugin 提供一组特定的 API ，通过 RPC 调用 agent 完成操作。
+    \begin{figure}[h]
+        \centering
+        \includegraphics[height=0.5\textheight]{openstack-swift-arch}
+        \caption{OpenStack Swift 的架构图}
+    \end{figure}
     \item \textbf{Swift:} Swift 项目是 OpenStack 提供的对象存储 (Object Storage)
      服务\footnote{对于程序员来说，这个概念容易和“面向对象”中的对象相混淆，前者是指在
     云端存储的一个文件，后者是对具有一定行为特征的一类概念的抽象}。一个 IaaS 服务框架，
@@ -112,6 +117,11 @@
     OpenStack 里的对象存储就是 Swift ，Swift 又分为访问层和存储层两部分，分别负责
     RESTful 请求的处理、权限控制和实际对象数据的存储。Swift 主要应用在不容易发生变化的
     数据文件上，例如磁盘镜像文件和备份文件，当然还有大的媒体文件。
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.7\textwidth]{openstack-cinder-arch}
+        \caption{OpenStack Cinder 的架构图}
+    \end{figure}
     \item \textbf{Cinder:} Cinder 项目是 OpenStack 提供的块存储 (Block Storage)
      机制，类似于 Amazon EBS (Elastic Block Storage) 。Cinder 提供了逻辑
     存储卷 (volume)的抽象，举例来说，如果数据库服务在一个由 Nova 提供的虚拟机里运行，
