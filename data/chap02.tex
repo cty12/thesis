@@ -117,6 +117,37 @@ Xen 使用了 X86 架构的特性，但是它还是软件实现的，并没有�
 \subsubsection{硬件支持的全虚拟化}
 \label{subsubsec:hardware-virt}
 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{segment-selectors.png}
+    \caption{X86 的段寄存器}
+\end{figure}
+
+% TODO 在这里画一个 FLAGS 的表格
+
+传统的 X86 架构对于虚拟化主要有两个阻碍：
+
+\begin{itemize}
+    \item 客户机操作系统可以观察到自己处于非特权状态。X86 的代码段寄存器 CS 的最低两位存储的
+    就是当前的特权级 (CPL, current privilege level)；
+    \item 当特权指令运行在非特权模式，也就是用户态 (user-level) 的时候，缺乏相应的陷入。
+    我们知道，X86 里的 FLAGS 寄存器一共有 16 位。如果运行特权指令 popf 的话，那么控制
+    ALU 的 ZF 位和控制系统的 IF 位\footnote{中断使能}都会被修改。客户虚拟机的内核必须触发
+    陷入虚拟机管理程序才能修改虚拟的 IF 寄存器位，但是事实上如果直接在用户态运行 popf ，那
+    陷入就不会发生，虚拟机管理程序无从知晓 IF 应该被修改这个事实。
+\end{itemize}
+
+Intel 的 VT 和 AMD 的 AMD-V 技术对 X86 的结构做出了一些扩展，使得其更好地支持虚拟化技术，
+这就是“硬件支持的全虚拟化”这个术语的含义。
+
+首先在内存中引入了一个虚拟机控制块 VMCB ，主要存贮客户虚拟机的状态信息和一些控制位。然后 X86
+处理器又增加了一个客户模式 (guest mode) 负责运行客户虚拟机的代码，尤其是特权代码。从宿主模式
+转变到客户模式需要使用一个全新的指令，vmrun 。
+
+那么如何判断自己的硬件是否支持硬件虚拟化技术呢？以本文作者目前使用基于 Haswell 架构的
+的戴尔 Chromebook 为例，/proc/cpuinfo 的输出中含有 vmx 标记位，就证明处理器支持
+ Intel 的硬件虚拟化技术。截至 2015 年，大部分 Intel 的处理器都支持这个功能。
+
 \section{管理工具}
 
 \section{RedHat 和 CentOS 7}
