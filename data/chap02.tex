@@ -81,6 +81,39 @@ VMWare 的改写是动态的，转换以后的代码存储在一块特殊的地�
 \subsubsection{半虚拟化}
 \label{subsubsec:paravirtualization}
 
+上文提到的纯软件的全虚拟化，比如 VMWare ESX ，实际上是存在效率问题的，
+这是因为虚拟机管理程序必须对客户虚拟机的整个内核的代码中的非陷入 (non-trapping)
+的特权指令进行修改，而且是动态修改。在 2003 年的 ACM SOSP 上，一种叫 Xen 的
+新型虚拟化技术被剑桥大学的计算机科学家提出出来~\cite{barham2003xen}。
+
+Xen 解决越级指令的办法，是将客户虚拟机的内核放在 Ring 1 执行，这是可行的，因为
+~\ref{subsubsec:software-virt}提到，现代的大多数 X86 平台的操作系统都
+只使用 Ring 0 执行内核代码和 Ring 3 执行用户态代码。符合这个条件的操作系统，
+比如 GNU/Linux 、Windows XP 和 BSD \footnote{在 2003 年的 Xen 1.0 版本中，
+事实上只有 GNU/Linux 内核是基本工作正常的，Windows 支持做了一部分，
+NetBSD 则几乎不能工作}，理论上都可以被移植 (port) 到 Xen 上。
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{xen-arch}
+    \caption{Xen 的架构}
+\end{figure}
+
+那么 Xen 是如何解决性能问题的呢？通常来讲，两种异常 (exception)的频繁发生会显著
+影响系统性能，也就是一般用软件异常 (softwareexception) 实现的系统调用，
+以及缺页异常。Xen 上运行的客户虚拟机的系统调用的效率通过允许客户机注册一个
+可以由进程直接访问而不用通过 Ring 0 的异常处理函数 (exception handler) 来
+提高。但是缺页异常就不能这样做，因为要访问 CR2 寄存器。所以缺页异常的处理必须通过
+Xen 本身，使得 CR2 被正确设置，并且能从 Ring 1 正确被客户虚拟机的内核访问。
+
+这样一来就带来了一个问题，客户虚拟机的内核必须要进行修改，来让自己“意识”到自己是在
+Xen 虚拟机管理程序而不是裸硬件上运行的。Xen 的作者管这样的虚拟化技术叫“半虚拟化”，
+区别于不需要修改客户虚拟机内核的全虚拟化技术。半虚拟化的好处是客户机负载运行效率
+要比早期的软件全虚拟化更高，坏处是需要使用一个修改过的内核，而且不是所有的内核都可以
+使用和 GNU/Linux 同样的方式，有的操作系统需要的精力更大一些。
+
+Xen 使用了 X86 架构的特性，但是它还是软件实现的，并没有改变处理器的架构。
+
 \subsubsection{硬件支持的全虚拟化}
 \label{subsubsec:hardware-virt}
 
