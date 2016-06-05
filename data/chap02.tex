@@ -187,10 +187,114 @@ Intel 的 VT 和 AMD 的 AMD-V 技术对 X86 的结构做出了一些扩展，�
 
 \subsection{容器虚拟化}
 
-容器虚拟化的技术实现和上文提到的各种虚拟化技术有很大的不同。
+容器虚拟化的技术实现和上文提到的各种虚拟化技术有很大的不同。而且现在业界对于什么样的虚拟化
+技术可以归类为“容器”也没有统一的说法，一个笼统的概念是容器是一个相对独立的运行环境。
+容器内部的进程可以使用宿主机的资源，但是又不能把宿主机的资源全部消耗掉，而且其运行环境必须
+和宿主机有一定的隔离，最小化对外界的影响，比如说虽然有容器内部的 root 权限，但是仍然
+有很多会影响宿主机的操作不能执行。
 
-\section{管理工具}
+类似的技术在很多操作系统上都有实现，比如 FreeBSD 上的 jail 或是 Solaris 上的 Zone ，
+但是容器技术普及推广开来，还是因为 Linux 虚拟容器。这里需要说明，我们通常说的 LXC 包含
+两层意思，一层是指 Linux 内核中对虚拟容器技术的实现，主要包括下文所说的命名空间 (namespace)
+和控制组 (cgroup) ，另外一层是指 LXC 的用户态管理工具，这个是次要的，但是是和用户经常打交道
+的部分。
 
-\section{RedHat 和 CentOS 7}
+\subsubsection{命名空间}
 
-\section{OpenStack 支持的虚拟化技术}
+命名空间 (namespace) 技术主要是用于访问隔离，主要包括\footnote{从 Linux kernel
+ 3.8 开始}六种——Mount Namespace 、PID Namespace、Net Namespace、IPC Namespace、
+UTS Namespace 还有 User Namespace ~\cite{docker-in-practice}。
+
+\begin{itemize}
+    \item \textbf{Mount Namespace} 用来隔离文件系统的挂载点，每个进程看到的文件系统会
+    被记录在 /proc/\$\$/mounts 里。这样的话，对于一个 Linux 虚拟容器，在容器内部挂载
+    或者卸载文件系统就不会影响到容器外的部分。之后我们会看到这个特性如何运用在 NOVA 对
+    procfs 的处理中；
+    \item \textbf{PID Namespace} 用来隔离不同命名空间之中的进程号 (PID) ，这样，
+    在不同的命名空间就可以使用同一个进程号了。举最简单的例子，init 进程的 PID 是 1 ，
+    那每个容器里开机肯定都会跑 init 进程，如何区分 PID 都是 1 的进程属于哪个容器，
+    这就是 PID Namespace 的工作了；
+    \item \textbf{Net Namespace} 用来隔离不同的命名空间之间的网络设备、路由表、端口号
+    等网络相关的信息；
+    \item \textbf{IPC Namespace} 主要用于管理不同的命名空间的 SysV IPC 标示符还有
+    POSIX 消息队列；
+    \item \textbf{UTS Namespace} 用来隔离命名空间的主机名和域名。之所以叫 UTS
+    是因为存储这些信息的结构体叫做 utsname 。
+    \item \textbf{User Namespace} 用来隔离命名空间之间的用户和用户组。举例来说，
+    多个容器可能都有 root 用户，这是非常正常的。但凡是 root 它的 UID 和 GID 都是 0 ，
+    那么如何区分“这个” root 账户是属于那个容器的这个任务就由 User namespace 负责。
+    这样，root 用户的权限只能限制在容器内部，而不能对宿主机进行特权操作。
+\end{itemize}
+
+那么命名空间有什么作用呢？比如在容器内部执行 hostnamectl set-hostname 操作
+\footnote{这个命令是 systemd 风格的，其它发行版可能有不同的命令，不过它们使用的
+系统调用都是相同的}设置主机名，那么宿主机的主机名还是保持原先的不变。这就是 UTS Namespace
+在起作用。
+
+\subsubsection{控制组}
+
+控制组 (cgroup) 技术就是控制一组进程对系统资源使用的一种技术，它是 Linux 内核的组成部分，
+已经被 Android 和目前绝大多数 Linux 发行版默认开启。Cgroup 可以管理的系统资源包括 CPU 、
+内存、I/O 等，而不同种类的资源的管理是由不同的模块实现的，主要包括以下几个模块：
+
+\begin{itemize}
+    \item \textbf{cpu:} 这个子系统主要用于限制一个进程组对 CPU 资源的占用，主要包括
+    三个方面：
+    \begin{itemize}
+        \item CPU 比重分配。比如有两个 cgroup ，cpu.shares 相同，那么如果两者争抢
+        CPU 资源，它们得到的 CPU 占用率上限配额是相同的；如果其中一个 cpu.shares 是
+        另一个的两倍，那么在抢占的时候前者最多可以得到后者两倍的 CPU 占用；
+        \item CPU 带宽限制。cpu.cfs_period_us 和 cpu.cfs_quota_us 两个参数的意思是
+        一个 cgroup 的进程在 cfs_period 的时间内最多只能运行 cfs_quota 这么多“配额”
+        的时间，然后就会被强制睡眠直到下一个 cfs_period 长度的时间片的到来。两者的单位
+        都是微秒；
+        \item 实时进程的带宽限制。使用 cpu.rt_period_us 和 cpu.rt_runtime_us 两个
+        参数，方法和上面相似。
+    \end{itemize}
+    \item \textbf{cpuset:} 进程组使用的 CPU 和内存节点。
+    \item \textbf{memory:} 这个子系统主要管理进程组能使用的内存资源，有如下几个重要
+    参数：
+    \begin{itemize}
+        \item memory.limit_in_bytes: 设置内存使用上限，单位是 Bytes ；
+        \item memory.memsw.limit_in_bytes: 和上面的类似，但是加上交换 (swap) 空间；
+        \item memory.oom_control: 设置为 0 来防止因为内存不足杀死进程。内存不足
+        无法运行的进程将阻塞直到系统释放出足够的内存供使用。另外，将通知用户态。
+    \end{itemize}
+    \item 另外还有 devices 、net_cls 、huge_tlb 等多个 cgroup 子系统。它们的功能
+    都是控制资源被进程组的使用，作用都是类似的，所以在这里不再赘述。
+\end{itemize}
+
+\section{OpenStack 支持的虚拟化类型}
+
+在~\ref{subsubsec:iaas}小节提到过，OpenStack 是一个开放的虚拟化“基础设施即服务”的平台，
+其中 OpenStack Nova 是负责虚拟机管理和计算的部分。那么，这个功能强大的基础设施平台究竟支持
+什么样的虚拟机管理程序呢？
+
+OpenStack Nova 对于虚拟机管理程序做了一个抽象层，这样，不同的虚拟机管理程序可以通过
+compute-driver 的形式整合进 OpenStack Nova 中。因为不同的虚拟化技术诞生有先后，
+OpenStack 对它们的支持程度和测试的详尽程度也不尽相同，分类来讲主要可以划分成以下三个
+层次：
+
+\begin{enumerate}
+    \item \textbf{Group A:} 这一组的虚拟机管理程序经过了完整的单元测试 (unit test)
+    和功能测试 (functional test) ，达到了基本上可用的程度。不过很遗憾目前只有一个：
+    \begin{itemize}
+        \item X86 平台的 QEMU-KVM
+    \end{itemize}
+    \item \textbf{Group B:} 这一组的虚拟机管理程序通过了完整的单元测试和部分的功能测试：
+    \begin{itemize}
+        \item Hyper-V
+        \item VMWare
+        \item XenServer
+        \item Xen on libvirt
+    \end{itemize}
+    \item \textbf{Group C:} 很少的单元测试、几乎没有功能测试，
+    可以认为是\textbf{不可用}：
+    \begin{itemize}
+        \item docker
+        \item LXC on libvirt
+    \end{itemize}
+\end{enumerate}
+
+那么，有没有一个用户友好的虚拟机管理软件栈能较好的支持新兴的 Linux 虚拟容器技术呢？
+这就是下文要介绍的 Tsinghua NOVA 系统。
