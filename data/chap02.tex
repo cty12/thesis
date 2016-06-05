@@ -125,10 +125,12 @@ Xen 使用了 X86 架构的特性，但是它还是软件实现的，并没有�
 
 \begin{table}[h]
     \centering
-    \begin{tabular}{||c c c c||}
+    \caption{X86 中的状态标志寄存器 FLAGS}
+    \begin{tabular}{||c c c||}
         \hline
-        Bit & Abbr & Description \\ [0.5ex]
-        \hline\hline
+        Bit & Abbr & Description \\
+        \hline
+        \hline
         0 & CF & Carry flag \\
         1 &  & Reserved \\
         2 & PF & Parity flag \\
@@ -141,12 +143,11 @@ Xen 使用了 X86 架构的特性，但是它还是软件实现的，并没有�
         9 & IF & Interrupt enable flag \\
         10 & DF & Direction flag \\
         11 & OF & Overflow flag \\
-        12-13 & IOPL & I/O privilege level (286+ only, otherwise alway 1) \\
-        14 & NT & Nested task flag (286+ only, otherwise always 1) \\
-        15 &  & Reserved \\ [0.5ex]
+        12-13 & IOPL & I/O privilege level (286+ only, all 1 otherwise) \\
+        14 & NT & Nested task flag (286+ only, 1 otherwise) \\
+        15 &  & Reserved \\
         \hline
     \end{tabular}
-    \caption{X86 中的状态标志寄存器 FLAGS}
     \label{table:flags-x86}
 \end{table}
 
