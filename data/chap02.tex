@@ -244,23 +244,23 @@ UTS Namespace 还有 User Namespace ~\cite{docker-in-practice}。
         \item CPU 比重分配。比如有两个 cgroup ，cpu.shares 相同，那么如果两者争抢
         CPU 资源，它们得到的 CPU 占用率上限配额是相同的；如果其中一个 cpu.shares 是
         另一个的两倍，那么在抢占的时候前者最多可以得到后者两倍的 CPU 占用；
-        \item CPU 带宽限制。cpu.cfs_period_us 和 cpu.cfs_quota_us 两个参数的意思是
-        一个 cgroup 的进程在 cfs_period 的时间内最多只能运行 cfs_quota 这么多“配额”
-        的时间，然后就会被强制睡眠直到下一个 cfs_period 长度的时间片的到来。两者的单位
+        \item CPU 带宽限制。cpu.cfs\_period\_us 和 cpu.cfs\_quota\_us 两个参数的意思是
+        一个 cgroup 的进程在 cfs\_period 的时间内最多只能运行 cfs\_quota 这么多“配额”
+        的时间，然后就会被强制睡眠直到下一个 cfs\_period 长度的时间片的到来。两者的单位
         都是微秒；
-        \item 实时进程的带宽限制。使用 cpu.rt_period_us 和 cpu.rt_runtime_us 两个
+        \item 实时进程的带宽限制。使用 cpu.rt\_period\_us 和 cpu.rt\_runtime\_us 两个
         参数，方法和上面相似。
     \end{itemize}
     \item \textbf{cpuset:} 进程组使用的 CPU 和内存节点。
     \item \textbf{memory:} 这个子系统主要管理进程组能使用的内存资源，有如下几个重要
     参数：
     \begin{itemize}
-        \item memory.limit_in_bytes: 设置内存使用上限，单位是 Bytes ；
-        \item memory.memsw.limit_in_bytes: 和上面的类似，但是加上交换 (swap) 空间；
-        \item memory.oom_control: 设置为 0 来防止因为内存不足杀死进程。内存不足
+        \item memory.limit\_in\_bytes: 设置内存使用上限，单位是 Bytes ；
+        \item memory.memsw.limit\_in\_bytes: 和上面的类似，但是加上交换 (swap) 空间；
+        \item memory.oom\_control: 设置为 0 来防止因为内存不足杀死进程。内存不足
         无法运行的进程将阻塞直到系统释放出足够的内存供使用。另外，将通知用户态。
     \end{itemize}
-    \item 另外还有 devices 、net_cls 、huge_tlb 等多个 cgroup 子系统。它们的功能
+    \item 另外还有 devices 、net\_cls 、huge\_tlb 等多个 cgroup 子系统。它们的功能
     都是控制资源被进程组的使用，作用都是类似的，所以在这里不再赘述。
 \end{itemize}
 

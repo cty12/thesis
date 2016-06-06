@@ -52,8 +52,54 @@ QEMU 对镜像文件的格式支持非常丰富，还有几种不常用的，因
 
 创建一个大小为 20GB 、格式为 qcow2 的镜像文件：
 
-\begin{lstlisting}[caption=创建镜像]
-    qemu-img create hello.qcow2 -f qcow2 20G
+\begin{lstlisting}[language=bash]
+qemu-img create hello.qcow2 -f qcow2 20G
 \end{lstlisting}
+
+查看镜像的详细信息：
+
+\begin{lstlisting}
+qemu-img info hello.qcow2
+\end{lstlisting}
+
+对镜像进行格式转换，例如把 raw 格式的镜像转为 qcow2 格式的镜像（从而利用 qcow2 格式更好的
+特性）：
+
+\begin{lstlisting}[language=bash]
+qemu-img convert -p -f raw -O qcow2 hello hello2.qcow2
+\end{lstlisting}
+
+加上 -p 参数就可以显示进度。
+
+对镜像进行压缩和加密，不过只有 qcow2 格式的镜像才支持这个功能，例如对刚才创建的镜像：
+
+\begin{lstlisting}[language=bash]
+qemu-img convert -c -f qcow2 -O qcow2 hello.qcow2 hello3.qcow2
+qemu-img convert -f qcow2 -O qcow2 hello.qcow2 hello4.qcow2 -o encryption
+\end{lstlisting}
+
+对镜像进行快照，这也是 qcow2 格式的一个特性。例如创建一个 hello.qcow2 的快照：
+
+\begin{lstlisting}[language=bash]
+qemu-img snapshot hello.qcow2 -c snapshot00
+\end{lstlisting}
+
+创建差量镜像。之所以要使用镜像差量技术，主要是有两个好处：
+
+\begin{enumerate}
+    \item \textbf{节约时间：} 通过一个命令可以立即从基镜像生成虚拟机用到的镜像，非常快；
+    \item \textbf{节约空间：} 镜像使用写时复制 (copy-on-write) 的模式，读取的时候读取
+    自己的或者是基镜像的镜像文件，写入的时候才写入自己的镜像文件，也就是差量镜像，这样
+    多个客户虚拟机用一个基镜像，把它们共同的点统一储存，而且只存一份，可以节约空间。
+    尤其是对于 Tsinghua NOVA 这种使用网络文件系统的平台，非常重要。
+\end{enumerate}
+
+创建的方法：
+
+\begin{lstlisting}[language=bash]
+qemu-img create -f qcow2 -b hello.qcow2 hello-bak
+\end{lstlisting}
+
+使用 qemu-img 工具还可以很方便地将差量镜像整合回完整的镜像。
 
 \subsubsection{几种网络存储方案的选型}
