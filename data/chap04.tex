@@ -29,7 +29,7 @@ panel) 和相同的操作方式管理由 QEMU-KVM 或是虚拟容器运行的虚
 
 我们在 ~\ref{subsubsec:hardware-virt} 小节提到，QEMU-KVM 模拟设备，比如磁盘设备，
 使用的是 QEMU ，因此 QEMU-KVM 支持的磁盘镜像格式就是 QEMU 支持的磁盘镜像格式，主要
-包括以下几种：
+包括以下几种~\cite{docker-in-practice}：
 
 \begin{itemize}
     \item \textbf{raw:} 简单的二进制镜像，在有的文件系统，比如 xfs 和 ext4 上支持稀疏
@@ -50,7 +50,7 @@ panel) 和相同的操作方式管理由 QEMU-KVM 或是虚拟容器运行的虚
 QEMU 对镜像文件的格式支持非常丰富，还有几种不常用的，因为篇幅所限不能一一介绍。Tsinghua NOVA
 使用 qcow2 格式，它能通过 QEMU 提供的用户态工具 qemu-img 支持虚拟机增量镜像，从而减少
 网络文件系统对镜像存储的负担。因为只要存储一个操作系统的基准镜像，然后每个客户虚拟机创建
-自己的增量镜像就可以了。下面简单介绍一下 qemu-img 的常见命令。
+自己的增量镜像就可以了。下面简单介绍一下 qemu-img 的常见命令~\cite{docker-in-practice}。
 
 创建一个大小为 20GB 、格式为 qcow2 的镜像文件：
 
@@ -175,6 +175,7 @@ NFS (Network File System) 是一种完全开放的分布式文件系统标准，
 虚拟容器客户机操作系统的自动部署和启动的。
 
 \subsubsection{根文件系统的展开}
+\label{subsubsec:deployment-rootfs}
 
 Tsinghua NOVA 系统的 Linux 虚拟容器支持有一个非常重要的特点，就是支持容器用户态负载的
 迁移 (migration) ——而且是动态迁移 (live migration)。这个特性会在后面的章节重点讲解，
@@ -211,4 +212,365 @@ Tsinghua NOVA 系统在运行过程中实现了一个动态调度特性\footnote
 
 虽然 Tsinghua NOVA 系统会通过 RPC 通知相应的从节点新的虚拟容器应该被创建，但是解压缩
 根文件系统这个步骤是在主节点操作的。这是基于两个事实：一是我们的系统里运行 web 界面服务的
-HTTP server 是跑在主节点上的
+HTTP server 是跑在主节点上的，也就是说，用户在网页端发出在某个宿主机上“新建虚拟容器”
+这个 HTTP 请求之后，主节点不通过任何 RPC 就可以收到这个 HTTP 请求；二是如果在从节点上
+运行的 Tsinghua NOVA 守护进程上做根文件系统的解压缩，那么就会产生大量的网络 I/O ，
+因为从节点上挂载的 NFS 目录必须和主节点保持同步，而我们的测试集群使用的是千兆以太网，相对
+于万转的机械硬盘，以太网的吞吐率 (throughput) 是很低的，所以容易成为瓶颈。
+
+% TODO 在这里插入镜像界面的截图
+
+在这个系统中，容器的基镜像被存储在 \$NOVA_HOME/run/run 目录，这个目录是从主节点上的某个
+目录\footnote{例如在我们的测试系统中是 /home/export，但是这个没有关系}挂载过来的，无论
+主节点从节点都是如此，我们称被挂载的目录为 NFS 基目录 (NFS base directory) 。而每个
+运行着的虚拟容器都保存着一份自己独立的文件系统，在容器部署之初，是由相应的基文件系统的压缩包
+直接解压过来的。同时，在每个容器自己的目录下还保存着一个 XML 文件包含了一些资源的定义，这个
+文件将在下一节详细介绍。例如名字是 testlxc 的虚拟容器它的目录就是 \$NOVA_HOME/run/run/
+testlxc ，里面包含一个 conf.xml 文件和一个 rootfs/ 目录。
+
+\begin{lstlisting}
+testlxc
+├── conf.xml
+└── rootfs/
+
+1 directory, 1 file
+\end{lstlisting}
+
+\subsubsection{XML 配置文件的定义}
+\label{subsubsec:xml-definition}
+
+在 ~\ref{subsubsec:deployment-rootfs} 小节提到，需要对 Linux 虚拟容器定义一个配置文件
+conf.xml ，在这一小节，具体讲解这个配置文件的来龙去脉。
+
+% TODO 在这里插入选择虚拟机配置对话框的截图
+
+首先要强调，这个配置文件是使用 libvirt 管理 LXC 所需要的，如果使用 LXC 自己的用户态工具，
+那么需要使用另外格式的配置文件定义，而两者可以使用 libvirt 提供的工具 domxml-from-native
+进行转换，例如转换一个叫做 testlxc 的虚拟容器的 config 文件：
+
+\begin{lstlisting}
+virsh -c lxc:/// domxml-from-native lxc-tools /var/lib/lxc/testlxc/config
+\end{lstlisting}
+
+一个简单的例子：
+
+\begin{lstlisting}
+    <domain type='lxc'>
+      <name>testlxc</name>
+      <uuid>cd7aedef-a0f6-470e-923c-64275b437937</uuid>
+      <memory unit='KiB'>512000</memory>
+      <currentMemory unit='KiB'>512000</currentMemory>
+      <vcpu placement='static'>1</vcpu>
+      <resource>
+        <partition>/machine</partition>
+      </resource>
+      <os>
+        <type arch='x86_64'>exe</type>
+        <init>/sbin/init</init>
+      </os>
+      <features>
+        <capabilities policy='allow'>
+        </capabilities>
+      </features>
+      <clock offset='utc'/>
+      <on_poweroff>destroy</on_poweroff>
+      <on_reboot>restart</on_reboot>
+      <on_crash>destroy</on_crash>
+      <devices>
+        <emulator>/usr/libexec/libvirt_lxc</emulator>
+        <filesystem type='mount' accessmode='passthrough'>
+          <source dir='/home/Nova/run/run/testlxc/rootfs'/>
+          <target dir='/'/>
+        </filesystem>
+        <interface type='bridge'>
+          <mac address='fe:13:f4:44:1c:3'/>
+          <source bridge='virbr0'/>
+          <link state='up'/>
+        </interface>
+        <console type='pty'>
+          <target type='lxc' port='0'/>
+        </console>
+      </devices>
+    </domain>
+\end{lstlisting}
+
+从这个例子中，可以看出 XML 包含几个关键的属性：
+
+\begin{enumerate}
+    \item \textbf{domain type:} 这个域 (domain) \footnote{在 libvirt 里一个虚拟机
+    称为一个域，域是 libvirt 管理的基本单位}的类型，如果是 LXC 就是 lxc ，如果是
+    QEMU-KVM 就是 kvm ；
+    \item \textbf{name:} 这个域的名称。在 Tsinghua NOVA 系统里，名称可以由用户
+    在网页的对话框里指定；
+    \item \textbf{uuid:} 是一个域的通用唯一识别码。在 Tsinghua NOVA 里是自动生成的；
+    \item \textbf{memory:} 对虚拟机内存的限制；具体到我们关心的 LXC 来说，就是通过
+    ~\ref{subsubsec:cgroup}小节提到的 cgroup 控制组技术限制运行在虚拟容器中的进程组
+    的最大内存配额，达到资源限制的作用；
+    \item \textbf{vcpu:} 和 \textbf{memory} 类似，通过控制 cgroup 的 cpuset 参数
+    达到限制 CPU 数量的目的。Intel 的超线程 (Hyperthreading) 技术可以使处理器的物理
+    核心数翻倍，在这里会有一定的优势；
+    \item \textbf{source:} 虚拟机的磁盘镜像或者根文件系统的绝对路径。
+\end{enumerate}
+
+\subsec{对虚拟机管理程序的抽象}
+
+Tsinghua NOVA 平台在设计的时候，一个很重要的特性就是对虚拟机管理程序 (hypervisor) 的
+抽象。在代码中，这一点主要体现在 worker.nova.worker.virt 这个包。
+
+目前 Tsinghua NOVA 只对两种虚拟机管理程序\footnote{Xen on libvirt 的条件判断在很多
+文件中写了，但这不代表 NOVA 已经支持了 Xen ，实际上还有很多工作要做}\footnote{LXC 严格
+来说不算 hypervisor ，有人提出了 lightervisor 的这种说法}——QEMU-KVM 和 LXC 。相应
+的代码在上述包中的 Lxc.java 和 Kvm.java 两个类里。
+
+比较关键的方法一个是生成 MAC 地址的 generateMacAddr 和生成配置文件的 emitDomain 。
+之所以要生成 MAC 地址是因为虚拟机使用的虚拟网卡需要一个 MAC 硬件地址。在下面的章节我们
+会看到这个是非常关键的，因为和 libvirt 管理的虚拟网关的 DHCP 配置有关系。
+
+在代码中的其它很多地方会看到对虚拟机管理程序的条件判断，这是因为目前对于虚拟机管理软件的
+抽象还不够彻底。实际上，在本文作者成为 Tsinghua NOVA 的主要开发者以前，Tsinghua NOVA
+甚至没有支持更多虚拟机管理软件的计划。
+
+\section{虚拟容器的迁移}
+
+这一节主要介绍如何在 Tsinghua NOVA 平台中实现了一个简单的容器实时迁移 (live migration)
+系统。
+
+首先要搞清楚为什么要实现迁移 (migration) 或者实时迁移 (live migration) 。我们在前文
+提到，一个虚拟集群中需要通过迁移进行调度。所谓实时迁移，就是在迁移过程中一方面尽量减小服务的
+宕机时间 (downtime) ，使得服务尽可能随时可用；另一方面保存迁移前服务的状态，不至于使得
+服务“从头再来”。比如说客户虚拟机运行的服务是使用 mplayer 播放的一首歌曲，那么迁移前播放到
+哪个位置，迁移之后还要从那个位置开始播放。
+
+当然，目前 Tsinghua NOVA 平台作为一个虚拟化管理系统，在迁移时不能保证完全没有开销。这
+主要是因为 Tsinghua NOVA 是完全没有 replica 的。实现同一服务在不同物理节点之间的
+状态复制 (state machine replication) 和容灾恢复，可以使用 Paxos 协议进行状态同步，
+其中一个对上层服务透明的系统是哥伦比亚大学的 Crane 系统
+\footnote{https://github.com/columbia/crane}~\ref{cui2015p}。
+
+\subsection{LXC 的迁移和 QEMU-KVM 的迁移的区别}
+
+% TODO 这里可以插入一个 libvirt migration 的图示
+
+LXC 和 KVM 的迁移的主要区别是到目前为止 libvirt 没有一个较好的对 LXC 的原生迁移 (native
+ migration) 的实现，而这一点对于 KVM 是有的。这也让 KVM 的迁移实现起来毫无难度。
+
+在命令行下使用 libvirt 的 shell 工具 virsh 进行迁移的实例如下，其中 test-migrate 是
+客户虚拟机的名字、desthost 是目标宿主机的主机名 (hostname) ：
+
+\begin{lstlisting}
+# kvm guest
+virsh migrate test-migrate qemu+ssh://desthost/system
+# xen guest
+virsh migrate test-migrate xen+tls://desthost/system
+\end{lstlisting}
+
+\subsection{实现非实时迁移}
+
+\begin{algorithm}
+    \begin{algorithmic}
+    \If {$hypervisor \eq "lxc"$}
+        \State $xml \gets srcDomain.getXml()$
+        \If {$srcDomain.active \eq 1$}
+            \State $srcDomain.destroy()$
+        \EndIf
+        \State $srcDomain.undefine()$
+        \State $dstDomain.define(xml)$
+        \State $dstDomain.create()$
+    \EndIf
+    \end{algorithmic}
+    \caption{非实时迁移的实现}
+\end{algorithm}
+
+简单来说，虚拟容器的迁移就是暂存客户虚拟容器的配置信息、关闭要迁移的客户虚拟容器、
+从源宿主机取消域定义、在目标宿主机上重新按照暂存的 XML 配置信息定义域、最后重新在新的宿主
+上启动这个域也就是要迁移的客户虚拟容器的过程。因为这些操作提供的 Java API 都是阻塞的，一个
+返回了之后才会继续执行下一个，所以无须使线程休眠。需要注意的是，在关闭虚拟容器时使用的是
+destroy() 方法而不是一般的 shutdown() ，主要是考虑到后者是非阻塞的，因为需要一段时间
+等待客户机的内核关闭。
+
+\subsection{实现实时迁移}
+
+所谓的实时迁移在这里指的就是保存了服务状态的迁移过程，这一小节主要解释如何使用开源的
+checkpoint/restore (C/R) 程序实现服务状态的迁移。
+
+需要注意，实时迁移和完全没有宕机时间 (downtime) 的迁移还不尽相同，后者一般称为
+seamless live migration ，因为它的开销小到不至于被终端用户 (end-user) 察觉。
+
+\subsubsection{在虚拟容器中配置 criu}
+
+在 ~\ref{subsubsec:deployment-rootfs} 小节中，提到了虚拟容器的文件系统在迁移过程中是
+保持静态的，也就是迁移的只是配置信息而不是整个根文件系统 (rootfs) 。这样，如果在迁移之前
+就将负载的关键进程的内存状态等信息 dump 进文件系统，然后迁移之后再从相应的文件里恢复，
+就可以实现负载的实时迁移了。
+
+上述功能是使用开源 C/R 工具 criu 实现的，顾名思义，就是“用户态的 C/R 工具”的意思。
+在使用最小安装的 Fedora 操作系统的容器中编译安装 criu 的方法如下：
+
+\begin{lstlisting}[language=bash]
+cd ~; git clone https://github.com/xemul/criu
+cd criu; make
+\end{lstlisting}
+
+\subsubsection{安装 libvirt 的驱动}
+
+想要通过 libvirt 对 Linux 虚拟容器进行操作，就要安装相应的驱动 (driver) 。以下的命令
+可以在 CentOS 7 上使用默认的包管理器 rpm 和 yum 安装 LXC 和 libvirt 驱动等依赖：
+
+\begin{lstlisting}[language=bash]
+# download EPEL package
+wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+# with ROOT
+# installs EPEL package first
+rpm -ivh epel-release-latest-7.noarch.rpm
+# installs lxc and templates
+yum install lxc lxc-templates lxc-libs
+# installs libvirt drivers
+yum install libvirt-daemon-driver-lxc libvirt-daemon-lxc
+\end{lstlisting}
+
+\subsubsection{C/R 自动化脚本}
+\label{subsubsec:cr-automation}
+
+这个脚本是用来在用户态对关键服务的进程进行 C/R 使用的，有如下几个参数：
+
+\begin{enumerate}
+    \item \textbf{checkpoint | restore} 选择是进行保存进程现场还是恢复现场；
+    \item \textbf{-c | --container} 用于指定虚拟容器的名称。如果 --ipaddr 参数
+    没有提供的话，将调用 nova-vmaddrctl 工具在 ARP 表缓存中寻找容器对应的 IP 地址；
+    \item \textbf{-p | --process} 用于指定关键服务的进程名称。即使服务拥有多个进程
+    ，比如 Apache httpd ，也可以正常工作。脚本按照进程名称查找对应的 PID ；
+    \item \textbf{-i | --ipaddr} 如果这个参数被设置，那么 --container 就无效。这个
+    参数是用来明文指定虚拟容器的 IP 地址的。
+\end{itemize}
+
+其中，nova-vmaddrctl 的实现方式是首先从域的 XML 配置定义中读取虚拟网卡的 MAC 地址，再
+在宿主机的 ARP 表缓存中寻找虚拟容器对应的 IP 地址。这个脚本的有效性和 ARP 缓存的超时时间
+(timeout) 设置有关。
+
+\subsubsubsection{将 procfs 设置为可写}
+
+通过阅读 criu 的代码，发现 criu 要求 /proc/sys/kernel/ns_last_pid 的写权限。但是
+容器默认的 procfs 被挂载为只读，所以 C/R 脚本会自动检查 ns_last_pid 的可写性，如果
+发现是只读的，那么就需要重新挂载 procfs ：
+
+\begin{lstlisting}[language=bash]
+mount -o remount,rw /proc/sys
+\end{lstlisting}
+
+实际上 criu 自带的一个参数 check 可以协助检查相关的设置是否满足 criu 正常运行的要求。
+
+\subsubsubsection{使用 Tmux 创建伪终端}
+
+在使用 criu 的时候，加入了参数 --shell-job ，那么需要有一个 tty 才能正常工作。
+在 C/R 脚本中，使用 Tmux 开启了一个伪终端，然后将 criu 需要的按键序列使用 Tmux 发送
+进虚拟容器内的操作系统。
+
+需要注意的是，如果使用 ssh 连进虚拟容器也会在 /dev/pts 下产生一个伪终端设备，而保存、
+恢复现场，也就是 checkpoint/restore 的过程中，/dev/pts 下的伪终端设备必须保持完全
+相同才可以。如果恢复进程失败了，那么有很大的可能性是环境中增加或减少了设备。
+
+\subsubsection{配置 libvirt DHCP}
+
+如果因为实验环境的需要，始终要保持 ARP 缓存为热 (warm cache) 的，可以在宿主机上插入静态的
+ARP 缓存表项目：
+
+\begin{lstlisting}[language=bash]
+arp -s 192.168.122.4 fe:13:6d:74:d6:a3
+\end{lstlisting}
+
+查看：
+
+\begin{lstlisting}[language=bash]
+# Linux mode
+arp -e
+# BSD mode
+arp -a
+\end{lstlisting}
+
+删除 IP 地址对应的表项：
+
+\begin{lstlisting}[language=bash]
+arp -d 192.168.122.4
+\end{lstlisting}
+
+在 virsh 命令行下，可以修改 libvirt 虚拟网络的 DHCP 服务设置，从而绑定静态的 IP 地址。
+
+查看所有 libvirt 网络配置：
+
+\begin{lstlisting}
+net-list
+\end{lstlisting}
+
+查看 default 网络的配置信息：
+
+\begin{lstlisting}
+net-dumpxml default
+\end{lstlisting}
+
+XML 格式的输出：
+
+\begin{lstlisting}
+    <network>
+      <name>default</name>
+      <uuid>666bb0b0-1760-4507-a41f-2d15bd27af3a</uuid>
+      <forward mode='nat'>
+        <nat>
+          <port start='1024' end='65535'/>
+        </nat>
+      </forward>
+      <bridge name='virbr0' stp='on' delay='0'/>
+      <mac address='52:54:00:b1:d0:62'/>
+      <ip address='192.168.122.1' netmask='255.255.255.0'>
+        <dhcp>
+          <range start='192.168.122.2' end='192.168.122.254'/>
+        </dhcp>
+      </ip>
+    </network>
+\end{lstlisting}
+
+修改 default 的配置：
+
+\begin{lstlisting}
+net-edit default
+\end{lstlisting}
+
+修改后的配置：
+
+\begin{lstlisting}
+    <network>
+      <name>default</name>
+      <uuid>666bb0b0-1760-4507-a41f-2d15bd27af3a</uuid>
+      <forward mode='nat'>
+        <nat>
+          <port start='1024' end='65535'/>
+        </nat>
+      </forward>
+      <bridge name='virbr0' stp='on' delay='0'/>
+      <mac address='52:54:00:b1:d0:62'/>
+      <ip address='192.168.122.1' netmask='255.255.255.0'>
+        <dhcp>
+          <range start='192.168.122.100' end='192.168.122.254'/>
+          <host mac='fe:13:6d:74:d6:a3' ip='192.168.122.4'/>
+          <host mac='fe:13:86:d8:c8:92' ip='192.168.122.5'/>
+        </dhcp>
+      </ip>
+    </network>
+\end{lstlisting}
+
+重启网络：
+
+\begin{lstlisting}
+net-destroy default
+net-start default
+\end{lstlisting}
+
+\section{实时获取准确的虚拟机 IP 地址}
+
+原先 Tsinghua NOVA 系统的虚拟机 IP 地址是从主节点运行的数据库服务上获得的，而且这个 IP
+是在虚拟机创建的时候以静态的形式分配的，非常死板。通过为 VnodeStatusDaemon 打补丁，支持
+了虚拟机节点的 IP 地址实时获取。
+
+% TODO 此处可以有虚拟机状态的获取流程图
+
+原理还是使用~\ref{cr-automation}小节介绍的 nova-vmaddrctl 脚本从 ARP 缓存中读取 IP
+地址。然后采用 RPC 的方式传回主节点更新数据库中的虚拟节点信息。
