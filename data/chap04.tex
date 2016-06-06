@@ -23,6 +23,37 @@ panel) 和相同的操作方式管理由 QEMU-KVM 或是虚拟容器运行的虚
 
 \subsubsection{存储的内容}
 
-首先看一下 QEMU-KVM 的镜像文件和 LXC 的根文件系统都具有什么特点。
+首先看一下 QEMU-KVM 的镜像文件和 LXC 的根文件系统 (rootfs) 都具有什么特点。
+
+我们在 ~\ref{subsubsec:hardware-virt} 小节提到，QEMU-KVM 模拟设备，比如磁盘设备，
+使用的是 QEMU ，因此 QEMU-KVM 支持的磁盘镜像格式就是 QEMU 支持的磁盘镜像格式，主要
+包括以下几种：
+
+\begin{itemize}
+    \item \textbf{raw:} 简单的二进制镜像，在有的文件系统，比如 xfs 和 ext4 上支持稀疏
+    存储的特性，也就是分配的空间会以 metadata 的形式被记录，从而实际占用的空间小于或者等于
+    分配的空间；
+    \item \textbf{cow:} 简单的写时复制 (copy-on-write) 镜像，这种格式不支持 Windows
+    虚拟机；
+    \item \textbf{qcow:} QEMU 写时复制 (copy-on-write) 格式，已经被 \textbf{qcow2}
+    格式取代了，QEMU 仍然兼容这种格式；
+    \item \textbf{qcow2:} 支持快照 (snapshot) 、稀疏存储（即使在不支持上文提到的稀疏
+    存储特性的文件系统上也可以实现，不受制于文件系统）、加密、压缩等高级特性的 QEMU 镜像
+    格式。这种格式有很好的特性和功能表现，所以是被 Tsinghua NOVA 系统采用用来运行 KVM
+    客户虚拟机操作系统的格式；
+    \item \textbf{vmdk:} VMWare 的磁盘镜像格式；
+    \item \textbf{vdi:} VirtualBox 的磁盘镜像格式；
+\end{itemize}
+
+QEMU 对镜像文件的格式支持非常丰富，还有几种不常用的，因为篇幅所限不能一一介绍。Tsinghua NOVA
+使用 qcow2 格式，它能通过 QEMU 提供的用户态工具 qemu-img 支持虚拟机增量镜像，从而减少
+网络文件系统对镜像存储的负担。因为只要存储一个操作系统的基准镜像，然后每个客户虚拟机创建
+自己的增量镜像就可以了。下面简单介绍一下 qemu-img 的常见命令。
+
+创建一个大小为 20GB 、格式为 qcow2 的镜像文件：
+
+\begin{lstlisting}[caption=创建镜像]
+    qemu-img create hello.qcow2 -f qcow2 20G
+\end{lstlisting}
 
 \subsubsection{几种网络存储方案的选型}
