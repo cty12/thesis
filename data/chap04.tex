@@ -105,6 +105,7 @@ qemu-img create -f qcow2 -b hello.qcow2 hello-bak
 使用 qemu-img 工具还可以很方便地将差量镜像整合回完整的镜像。
 
 \subsubsubsection{LXC 的根文件系统}
+\label{subsubsubsec:rootfs-lxc}
 
 LXC 的根文件系统完全是在宿主的文件系统上创建的一个普通的目录，包含客户机的完整的根文件系统，
 默认在 /var/lib/lxc 下。由于 namespace 技术将不同容器使用的磁盘资源做了隔离，所以不同
@@ -139,6 +140,7 @@ lxc-snapshot -n test-fedora-1
 \footnote{比如：https://shipyard-project.com/}
 
 \subsubsection{几种网络存储方案的选型}
+\label{subsubsec:network-storage}
 
 明确了要存储什么样的镜像资料之后，就要开始对网络存储方案进行选型。网络存储主要是为了
 在创建虚拟机的时候能及时调用相应的镜像文件，从而创建并运行新的客户机。主要考察了
@@ -164,3 +166,49 @@ ferhatakgun.com/network-share-performance-differences-between-nfs-smb/}。
 
 NFS (Network File System) 是一种完全开放的分布式文件系统标准，支持大多数平台，而且性能
 也相对比较好。在 Tsinghua NOVA 系统中，我们使用它完成客户机操作系统镜像的共享和存储。
+
+\subsection{虚拟容器的自动部署和启动}
+
+在之前的章节~\ref{subsubsubsec:rootfs-lxc}和~\ref{subsubsec:network-storage}，
+我们介绍了 Linux 虚拟容器的文件系统存储结构以及 Tsinghua NOVA 管理系统使用的网络存储
+方案。在这一节，介绍 Tsinghua NOVA 系统是如何利用前面介绍的相关工具的特点实现 Linux
+虚拟容器客户机操作系统的自动部署和启动的。
+
+\subsubsection{根文件系统的展开}
+
+Tsinghua NOVA 系统的 Linux 虚拟容器支持有一个非常重要的特点，就是支持容器用户态负载的
+迁移 (migration) ——而且是动态迁移 (live migration)。这个特性会在后面的章节重点讲解，
+在本小节，先介绍实现动态迁移技术的文件系统基础。
+
+通过对 LXC 的介绍，认识到如果在两台宿主机之间迁移一个虚拟容器，那么一个朴素 (trivial)
+的想法就是通过网络把根文件系统 (rootfs) 从源宿主机 (source host) 传输到目标宿主机
+(destination host) 上。这个传输最朴素的话可以使用 scp 实现，但是这样的话，每次虚拟容器
+迁移都要占用很高的带宽。
+
+Tsinghua NOVA 系统在运行过程中实现了一个动态调度特性\footnote{这个功能目前还是初步且
+实验性的，所以没有成为本论文的一部分}，也就是所谓的 LoadBalancingDaemon 。负载均衡
+(load balancing) 是一个非常大的概念，流行的框架比如 HAProxy
+\footnote{http://www.haproxy.org/} 是在 TCP/HTTP 请求 (request) 的层面上做均衡，
+而对于一个虚拟化管理系统，也应该考虑在客户虚拟机负载情况的角度做负载均衡，也就是虚拟机的
+调度 (scheduling) 。支持这个技术的虚拟化管理系统面临的一个挑战就是如何减小虚拟机迁移
+的开销 (overhead) 。因为如果虚拟机迁移的开销非常大的话，那么就很容易抵消掉做虚拟机调度
+带来的性能提升，因为这种提升本质上是靠进行了虚拟机迁移带来的。当然，理想情况是虚拟机迁移
+根本不需要开销，也就是一个虚拟机“一下子”从物理集群中的一台宿主机跑到了另一台宿主机上接着
+运行。但是这个是不可能的，因为保存现场，也就是虚拟机（或者是虚拟容器，对于虚拟容器的情况
+我们下面会看到）中负载的进程的运行状态以及恢复现场肯定是需要时间的，而且整个系统的 RPC
+通讯也需要时间，因为需要告诉目标宿主机原来的宿主上的虚拟机已经被调度器 (scheduler) 杀死了。
+
+综上，在现实中虚拟容器迁移的开销越小越好。针对文件系统的迁移自然也是如此，那么有没有办法将
+文件系统的迁移开销减少到 0 呢？是有的。这也就是之所以 Tsinghua NOVA 要把 NFS 作为依赖的
+原因。
+
+在 Tsinghua NOVA 系统中，既使用 NFS 来保存使用的操作系统根文件系统，也用 NFS 来保存
+每一个虚拟容器的根文件系统。这个根文件系统在虚拟容器创建之时完全是操作系统根文件系统压缩包
+的一个复制。解包出这个文件系统肯定是需要开销的，但是我们将在后面的章节的实验中说明这个开销
+在我们的测试环境中表现得完全是可以接受的。
+
+% TODO 这里应该有一个创建虚拟容器的 RPC 流程图
+
+虽然 Tsinghua NOVA 系统会通过 RPC 通知相应的从节点新的虚拟容器应该被创建，但是解压缩
+根文件系统这个步骤是在主节点操作的。这是基于两个事实：一是我们的系统里运行 web 界面服务的
+HTTP server 是跑在主节点上的
