@@ -1,0 +1,28 @@
+\chapter{多虚拟化集群管理系统的设计}
+\label{cha:multi-hypervisor-management-system}
+
+通过努力使得 Tsinghua NOVA 系统通过 libvirt 支持了 LXC 虚拟容器，从而从单一的 QEMU-KVM
+虚拟集群管理，转变为支持多种虚拟化方案的多虚拟化集群管理系统。而且，管理通过不同的虚拟化技术
+运行的虚拟机的用户接口部分是完全相同的，也就是说，用户可以通过一个统一的控制面板 (control
+panel) 和相同的操作方式管理由 QEMU-KVM 或是虚拟容器运行的虚拟机。
+
+\section{容器的自动部署}
+\label{sec:auto-deployment}
+
+所谓自动部署，无论是对何种虚拟化技术，都是指的从展开客户机需要的操作系统磁盘镜像、到部署客户机的
+用户态应用程序、再到连接到管理程序的虚拟机驱动并实现用户对客户机的管理的步骤。在 Tsinghua NOVA
+系统中，下层的虚拟化平台对用户来讲是完全透明的。
+
+\subsection{存储方案的比较}
+\label{subsec:comparison-network-storage}
+
+既然是一个虚拟化管理平台，那么就需要对虚拟机磁盘镜像或者根文件系统 (rootfs) 进行统一的管理。
+在 Tsinghua NOVA 系统中，是由一个主节点 (master node) 提供 web 服务和虚拟机调度服务，
+在多个从节点 (slave node) 上部署虚拟集群，所以这个镜像存储服务自然也是将主节点作为服务器、
+从节点作为客户端的。
+
+\subsubsection{存储的内容}
+
+首先看一下 QEMU-KVM 的镜像文件和 LXC 的根文件系统都具有什么特点。
+
+\subsubsection{几种网络存储方案的选型}
