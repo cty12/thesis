@@ -25,6 +25,8 @@ panel) 和相同的操作方式管理由 QEMU-KVM 或是虚拟容器运行的虚
 
 首先看一下 QEMU-KVM 的镜像文件和 LXC 的根文件系统 (rootfs) 都具有什么特点。
 
+\subsubsubsection{QEMU 磁盘镜像}
+
 我们在 ~\ref{subsubsec:hardware-virt} 小节提到，QEMU-KVM 模拟设备，比如磁盘设备，
 使用的是 QEMU ，因此 QEMU-KVM 支持的磁盘镜像格式就是 QEMU 支持的磁盘镜像格式，主要
 包括以下几种：
@@ -101,5 +103,39 @@ qemu-img create -f qcow2 -b hello.qcow2 hello-bak
 \end{lstlisting}
 
 使用 qemu-img 工具还可以很方便地将差量镜像整合回完整的镜像。
+
+\subsubsubsection{LXC 的根文件系统}
+
+LXC 的根文件系统完全是在宿主的文件系统上创建的一个普通的目录，包含客户机的完整的根文件系统，
+默认在 /var/lib/lxc 下。由于 namespace 技术将不同容器使用的磁盘资源做了隔离，所以不同
+容器可以挂载各自的根文件系统 (rootfs) 并读写之，不会产生干扰。在宿主机上也可以直接对
+这些目录进行修改，例如创建文件。
+
+这样的好处是 LXC 的根文件系统 (rootfs) 具有可移动性 (portability) ，比如可以将一个虚拟
+容器的文件系统直接拷贝到新的宿主上直接运行，可以保留原先的所有资料不至于丢失。而且在宿主上
+可以直接访问客户机的根文件系统，就像一个普通目录一样，这也是一个非常方便的特性。
+
+LXC 的用户态工具提供了一些处理根文件系统 (rootfs) 的手段，但是较为简单和直接，举例如下：
+
+在 /var/lib/lxc/test-fedora-1/rootfs 里创建一个基于 Fedora 22 的根文件系统，
+因为需要联网下载所需文件，所以速度主要取决于网速，当然宿主的磁盘 I/O 也是很重要的：
+
+\begin{lstlisting}
+lxc-create -n test-fedora-1 -t fedora
+\end{lstlisting}
+
+对根文件系统进行快照。所谓的快照就是把根文件系统 (rootfs) 复制一份保留下来：
+
+\begin{lstlisting}
+lxc-snapshot -n test-fedora-1
+\end{lstlisting}
+
+还有诸如 lxc-clone 等几个功能，总而言之是非常简单的，不仅相比 QEMU-KVM 的镜像组织
+\footnote{qcow2 的镜像差量功能相当于自带了一个简单的去冗余}来说，而且相比 docker
+完整的镜像定义、组织和类似 git 的版本管理也逊色很多。但是 LXC 的好处是它的基本功能
+都比较简单，而且相应的 libvirt 驱动处于一个基本可用的状态，所以 Tsinghua NOVA
+系统还是选取 LXC 而不是 docker 作为 Linux 虚拟容器的解决方案。当然，docker 的
+“一揽子”用户态工具是非常非常方便的，类似的基于 web 的图形管理控制面板也有不少。
+\footnote{比如：https://shipyard-project.com/}
 
 \subsubsection{几种网络存储方案的选型}
