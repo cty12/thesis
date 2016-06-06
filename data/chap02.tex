@@ -190,7 +190,7 @@ Intel 的 VT 和 AMD 的 AMD-V 技术对 X86 的结构做出了一些扩展，�
 容器虚拟化的技术实现和上文提到的各种虚拟化技术有很大的不同。而且现在业界对于什么样的虚拟化
 技术可以归类为“容器”也没有统一的说法，一个笼统的概念是容器是一个相对独立的运行环境。
 容器内部的进程可以使用宿主机的资源，但是又不能把宿主机的资源全部消耗掉，而且其运行环境必须
-和宿主机有一定的隔离，最小化对外界的影响，比如说虽然有容器内部的 root 权限，但是仍然
+和宿主机有一定的隔离，对外界的影响比较小，比如说虽然有容器内部的 root 权限，但是仍然
 有很多会影响宿主机的操作不能执行。
 
 类似的技术在很多操作系统上都有实现，比如 FreeBSD 上的 jail 或是 Solaris 上的 Zone ，
@@ -200,6 +200,7 @@ Intel 的 VT 和 AMD 的 AMD-V 技术对 X86 的结构做出了一些扩展，�
 的部分。
 
 \subsubsection{命名空间}
+\label{subsubsec:namespace}
 
 命名空间 (namespace) 技术主要是用于访问隔离，主要包括\footnote{从 Linux kernel
  3.8 开始}六种——Mount Namespace 、PID Namespace、Net Namespace、IPC Namespace、
@@ -218,8 +219,7 @@ UTS Namespace 还有 User Namespace ~\cite{docker-in-practice}。
     等网络相关的信息；
     \item \textbf{IPC Namespace} 主要用于管理不同的命名空间的 SysV IPC 标示符还有
     POSIX 消息队列；
-    \item \textbf{UTS Namespace} 用来隔离命名空间的主机名和域名。之所以叫 UTS
-    是因为存储这些信息的结构体叫做 utsname 。
+    \item \textbf{UTS Namespace} 用来隔离命名空间的主机名和域名。
     \item \textbf{User Namespace} 用来隔离命名空间之间的用户和用户组。举例来说，
     多个容器可能都有 root 用户，这是非常正常的。但凡是 root 它的 UID 和 GID 都是 0 ，
     那么如何区分“这个” root 账户是属于那个容器的这个任务就由 User namespace 负责。
@@ -232,6 +232,7 @@ UTS Namespace 还有 User Namespace ~\cite{docker-in-practice}。
 在起作用。
 
 \subsubsection{控制组}
+\label{subsubsec:cgroup}
 
 控制组 (cgroup) 技术就是控制一组进程对系统资源使用的一种技术，它是 Linux 内核的组成部分，
 已经被 Android 和目前绝大多数 Linux 发行版默认开启。Cgroup 可以管理的系统资源包括 CPU 、
@@ -243,7 +244,7 @@ UTS Namespace 还有 User Namespace ~\cite{docker-in-practice}。
     \begin{itemize}
         \item CPU 比重分配。比如有两个 cgroup ，cpu.shares 相同，那么如果两者争抢
         CPU 资源，它们得到的 CPU 占用率上限配额是相同的；如果其中一个 cpu.shares 是
-        另一个的两倍，那么在抢占的时候前者最多可以得到后者两倍的 CPU 占用；
+        另一个的一半，那么在抢占的时候后者最多可以得到前者两倍的 CPU 占用；
         \item CPU 带宽限制。cpu.cfs\_period\_us 和 cpu.cfs\_quota\_us 两个参数的意思是
         一个 cgroup 的进程在 cfs\_period 的时间内最多只能运行 cfs\_quota 这么多“配额”
         的时间，然后就会被强制睡眠直到下一个 cfs\_period 长度的时间片的到来。两者的单位
