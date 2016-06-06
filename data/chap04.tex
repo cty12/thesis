@@ -139,3 +139,28 @@ lxc-snapshot -n test-fedora-1
 \footnote{比如：https://shipyard-project.com/}
 
 \subsubsection{几种网络存储方案的选型}
+
+明确了要存储什么样的镜像资料之后，就要开始对网络存储方案进行选型。网络存储主要是为了
+在创建虚拟机的时候能及时调用相应的镜像文件，从而创建并运行新的客户机。主要考察了
+SSHFS / SMB / NFS 几种网络文件存储协议和文件系统。
+
+SSHFS 的优点是它基于 FUSE 。FUSE 是一种用户态文件系统框架，可以很方便地创造用户态
+文件系统。文件系统跑在用户态的好处是即使它崩掉了也不会影响系统内核的运行，比如我们
+需要一个可以将云盘挂载到本地的文件系统，那么最好让它跑在用户态，因为这个功能对于操作系统
+内核来讲通常是无关紧要的，即使崩溃了也没关系。基于 FUSE 文件系统的一个例子是笔者
+写的 sdbfs \footnote{Simple database file system:
+https://github.com/cty12/sdbfs} ，它能将文件系统的读写自动转化为 sqlite 的数据库操作。
+
+SSHFS 的缺点也很明显，就是它是基于 SSH (secure shell) 的，创建文件只能创建使用该账户
+连接的那个用户所有的，而且在一个连接内不能方便地切换用户。对于我们的需求，这个特点显得
+不够灵活。而且 Tsinghua NOVA 系统因为历史遗留原因需要 root 权限运行。
+
+SMB (Server Message Block) 是微软 Windows 系统默认使用的一种文件共享协议，可以方便
+地启动“共享文件夹”\footnote{“目录” (directory) 在微软的操作系统下称为“文件夹” (folder)}
+功能。SMB 服务有开源的实现叫做 samba ，被主流的 GNU/Linux 发行版包括在软件源内，但是
+微软的闭源（私有）实现和 samba 的开源实现有一定的差距，而且这个差距会反映在两者的性能上。
+而且 samba 的实现在小文件的读写上，和 NFS 具有一定的差距\footnote{https://
+ferhatakgun.com/network-share-performance-differences-between-nfs-smb/}。
+
+NFS (Network File System) 是一种完全开放的分布式文件系统标准，支持大多数平台，而且性能
+也相对比较好。在 Tsinghua NOVA 系统中，我们使用它完成客户机操作系统镜像的共享和存储。
