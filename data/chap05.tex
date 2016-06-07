@@ -150,7 +150,7 @@ Mongoose 和 Apache httpd 的测试结果分别如表~\ref{tab:mongoose-perf}
 
 \subsubsection{存储和数据库服务}
 
-Memcached、Redis 还有 Mysql 的测试情况分别如~\ref{tab:memcached-perf}、
+Memcached、Redis 还有 Mysql 的测试情况分别如表~\ref{tab:memcached-perf}、
 ~\ref{tab:redis-perf}还有~\ref{tab:mysql-perf}所示：
 
 \begin{table}[H]
@@ -227,8 +227,69 @@ Memcached、Redis 还有 Mysql 的测试情况分别如~\ref{tab:memcached-perf}
     \label{tab:mysql-perf}
 \end{table}
 
+\subsubsection{解压缩}
+
+tar/xz 的测试结果如表~\ref{tab:tar-xz-perf}所示：
+
+\begin{table}[H]
+    \centering
+    \caption{Tar/xz 的性能测试结果}
+    \begin{tabular}{||c c c c||}
+        \hline
+        FIELD & KVM & LXC & BAREMETAL \\
+        \hline
+        \hline
+        Real (s) & 17.901 & 26.646 & 16.518 \\
+        \hline
+        User (s) & 11.331 & 11.065 & 11.025 \\
+        \hline
+        Sys (s) & 6.106 & 5.857 & 5.477 \\
+        \hline
+    \end{tabular}
+    \label{tab:tar-xz-perf}
+\end{table}
+
+\subsection{小结}
+
+在上述几个实验中，除了 Mongoose 和 Tar/xz 两项，LXC 都相较于 QEMU-KVM 有性能优势。
+当然，KVM 是虚拟机管理程序中非常高效的一种，它是完全利用硬件虚拟化的。LXC 虚拟容器能
+在多数指标上优于 KVM ，证明虚拟容器技术有自己的优势。
+
 \section{调度性能评估}
 
 \subsection{实验环境}
 
+实验环境包含三台由千兆以太网交换机相连的机架式服务器，它们的匹配如下：
+
+\begin{lstlisting}
+Dell PowerEdge R720
+|-- Dual Xeon E5-2640 v2
+|-- 32GB DDR3 ECC SDRAM
+|-- CentOS 7.2 x86_64 (Linux 3.10.0)
+|-- Oracle Java SE 1.7.0_79
+|-- Libvirt 1.2.17
+\end{lstlisting}
+
+其中一台作为主节点 (master node) ，另外两台作为从节点 (slave node) 。主节点还作为另外
+两者的网关，从节点不运行防火墙，主节点运行 iptables 服务作为防火墙，关闭了 CentOS 默认
+使用的 firewalld 。从节点所有 IPV4 流量需要经过主节点转发。
+
 \subsection{迁移开销}
+
+通过在 Tsinghua NOVA 系统中打印日志的形式进行测量。一次运行的结果如下：
+
+\begin{lstlisting}
+2016-05-05 21:08:43,693: uuid of domain to migrate is 30680a29-215a-48a6-b728-5643fb7d7dc7
+2016-05-05 21:08:43,693: checkpoint! container name: testlxc4; process name: toy.py; ip addr: 192.168.122.4
+2016-05-05 21:08:43,694: cmd: /home/Nova/lxc-cr-wrapper checkpoint -c testlxc4 -p toy.py -i 192.168.122.4
+2016-05-05 21:08:54,009: dst domain created.
+2016-05-05 21:08:54,009: restoring process in destination domain...
+2016-05-05 21:08:54,009: restore! dst ip: 192.168.7.101; container name: testlxc4; process name: toy.py; ip addr: 192.168.122.4
+2016-05-05 21:08:54,010: cmd: ssh 192.168.7.101 /home/Nova/lxc-cr-wrapper restore -c testlxc4 -p toy.py -i 192.168.122.4
+2016-05-05 21:09:21,294: restore succeeded!
+\end{lstlisting}
+
+可以看出，在源宿主机上的虚拟容器中 checkpoint 负载进程需要大约 10 秒，而在目标宿主机上
+迁移过后的虚拟容器中 restore 负载进程需要 27 秒左右。整个过程存在大约 40 秒的开销。
+
+% TODO 在这里测量一下创建虚拟机的开销
