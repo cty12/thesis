@@ -203,7 +203,11 @@ Tsinghua NOVA 系统在运行过程中实现了一个动态调度特性\footnote
 的一个复制。解包出这个文件系统肯定是需要开销的，但是我们将在后面的章节的实验中说明这个开销
 在我们的测试环境中表现得完全是可以接受的。
 
-% TODO 这里应该有一个创建虚拟容器的 RPC 流程图
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{create-vnode}
+    \caption{创建虚拟容器的工作流程}
+\end{figure}
 
 虽然 Tsinghua NOVA 系统会通过 RPC 通知相应的从节点新的虚拟容器应该被创建，但是解压缩
 根文件系统这个步骤是在主节点操作的。这是基于两个事实：一是我们的系统里运行 web 界面服务的
@@ -213,7 +217,11 @@ HTTP server 是跑在主节点上的，也就是说，用户在网页端发出�
 因为从节点上挂载的 NFS 目录必须和主节点保持同步，而我们的测试集群使用的是千兆以太网，相对
 于万转的机械硬盘，以太网的吞吐率 (throughput) 是很低的，所以容易成为瓶颈。
 
-% TODO 在这里插入镜像界面的截图
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{image-manager}
+    \caption{Tsinghua NOVA 的镜像管理界面}
+\end{figure}
 
 在这个系统中，容器的基镜像被存储在 \$NOVA\_HOME/run/run 目录，这个目录是从主节点上的某个
 目录\footnote{例如在我们的测试系统中是 /home/export，但是这个没有关系}挂载过来的，无论
@@ -222,6 +230,8 @@ HTTP server 是跑在主节点上的，也就是说，用户在网页端发出�
 直接解压过来的。同时，在每个容器自己的目录下还保存着一个 XML 文件包含了一些资源的定义，这个
 文件将在下一节详细介绍。例如名字是 testlxc 的虚拟容器它的目录就是 \$NOVA\_HOME/run/run/
 testlxc ，里面包含一个 conf.xml 文件和一个 rootfs/ 目录。
+
+% TODO fix it!
 
 \begin{lstlisting}
 testlxc
@@ -237,7 +247,11 @@ testlxc
 在 ~\ref{subsubsec:deployment-rootfs} 小节提到，需要对 Linux 虚拟容器定义一个配置文件
 conf.xml ，在这一小节，具体讲解这个配置文件的来龙去脉。
 
-% TODO 在这里插入选择虚拟机配置对话框的截图
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.4\textwidth]{guest-config-dialog}
+    \caption{客户虚拟机配置界面}
+\end{figure}
 
 首先要强调，这个配置文件是使用 libvirt 管理 LXC 所需要的，如果使用 LXC 自己的用户态工具，
 那么需要使用另外格式的配置文件定义，而两者可以使用 libvirt 提供的工具 domxml-from-native
@@ -589,7 +603,11 @@ Tsinghua NOVA 提供的 RPC 机制，也可以使用 ssh 。
 是在虚拟机创建的时候以静态的形式分配的，非常死板。通过为 VnodeStatusDaemon 打补丁，支持
 了虚拟机节点的 IP 地址实时获取。
 
-% TODO 此处可以有虚拟机状态的获取流程图
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{vnode-status}
+    \caption{获取虚拟机状态的基本流程}
+\end{figure}
 
 原理还是使用~\ref{subsubsec:cr-automation}小节介绍的 nova-vmaddrctl 脚本从 ARP 缓存中读取 IP
 地址。然后采用 RPC 的方式传回主节点更新数据库中的虚拟节点信息。
