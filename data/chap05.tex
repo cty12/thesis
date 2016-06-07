@@ -103,7 +103,10 @@ apachectl 可以控制 httpd 的运行与停止，通过 -f 参数可以指定�
 
 \subsection{实验结果}
 
-Mongoose 的测试结果如表~\ref{tab:mongoose-perf}。
+\subsubsection{Web 服务器}
+
+Mongoose 和 Apache httpd 的测试结果分别如表~\ref{tab:mongoose-perf}
+以及~\ref{tab:apache-perf}。
 
 \begin{table}[h]
     \centering
@@ -123,6 +126,105 @@ Mongoose 的测试结果如表~\ref{tab:mongoose-perf}。
         \hline
     \end{tabular}
     \label{tab:mongoose-perf}
+\end{table}
+
+\begin{table}[h]
+    \centering
+    \caption{Apache httpd 的性能测试结果}
+    \begin{tabular}{||c c c c||}
+        \hline
+        FIELD & KVM & LXC & BAREMETAL \\
+        \hline
+        \hline
+        Time per request (ms) & 275.432 & 253.109 & 271.302 \\
+        \hline
+        Requests per sec & 29.05 & 31.61 & 29.49 \\
+        \hline
+        Transfer rate (KB/s) & 6.44 & 7.01 & 6.54 \\
+        \hline
+        Time taken (s) & 4.407 & 4.05 & 4.341 \\
+        \hline
+    \end{tabular}
+    \label{tab:apache-perf}
+\end{table}
+
+\subsubsection{存储和数据库服务}
+
+Memcached、Redis 还有 Mysql 的测试情况分别如~\ref{tab:memcached-perf}、
+~\ref{tab:redis-perf}还有~\ref{tab:mysql-perf}所示：
+
+\begin{table}[h]
+    \centering
+    \caption{Memcached 的性能测试结果}
+    \begin{tabular}{||c c c c||}
+        \hline
+        FIELD & KVM & LXC & BAREMETAL \\
+        \hline
+        \hline
+        Total time (s) & 4.685 & 1.707 & 1.292 \\
+        \hline
+    \end{tabular}
+    \label{tab:memcached-perf}
+\end{table}
+
+\begin{table}[h]
+    \centering
+    \caption{Redis 的性能测试结果}
+    \begin{tabular}{||c c c c||}
+        \hline
+        FIELD (req/s) & KVM & LXC & BAREMETAL \\
+        \hline
+        \hline
+        PING_INLINE & 25859.84 & 44365.57 & 49261.09 \\
+        \hline
+        PING_BULK & 31113.88 & 44208.66 & 50968.40 \\
+        \hline
+        SET & 26096.03 & 48030.74 & 59594.76 \\
+        \hline
+        GET & 28003.36 & 54171.18 & 55834.73 \\
+        \hline
+        INCR & 25284.45 & 46750.82 & 58788.95 \\
+        \hline
+        LPUSH & 26961.44 & 48123.20 & 60240.96 \\
+        \hline
+        RPUSH & 27300.03 & 46750.82 & 59952.04 \\
+        \hline
+        LPOP & 23337.22 & 46339.20 & 60024.01 \\
+        \hline
+        RPOP & 26198.59 & 46533.27 & 59523.81 \\
+        \hline
+        SADD & 26075.62 & 46360.68 & 58685.45 \\
+        \hline
+        SPOP & 26253.61 & 46794.57 & 57240.98 \\
+        \hline
+        LRANGE_100 & 28232.64 & 28320.59 & 29868.58 \\
+        \hline
+        LRANGE_300 & 12992.08 & 10736.53 & 12729.12 \\
+        \hline
+        LRANGE_500 & 9095.04 & 8318.78 & 9489.47 \\
+        \hline
+        LRANGE_600 & 7808.23 & 7190.62 & 7487.27 \\
+        \hline
+        MSET (10 keys) & 23691.07 & 42936.88 & 57903.88 \\
+        \hline
+    \end{tabular}
+    \label{tab:redis-perf}
+\end{table}
+
+\begin{table}[h]
+    \centering
+    \caption{Mysql 的性能测试结果}
+    \begin{tabular}{||c c c c||}
+        \hline
+        FIELD & KVM & LXC & BAREMETAL \\
+        \hline
+        \hline
+        Total time (s) & 4.2884 & 4.0552 & 3.9215 \\
+        \hline
+        Response time (ms) & 336.99 & 315.09 & 307.25 \\
+        \hline
+    \end{tabular}
+    \label{tab:mysql-perf}
 \end{table}
 
 \section{调度性能评估}
