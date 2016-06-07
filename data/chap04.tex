@@ -203,9 +203,9 @@ Tsinghua NOVA 系统在运行过程中实现了一个动态调度特性\footnote
 的一个复制。解包出这个文件系统肯定是需要开销的，但是我们将在后面的章节的实验中说明这个开销
 在我们的测试环境中表现得完全是可以接受的。
 
-\begin{figure}[h]
+\begin{figure}[t]
     \centering
-    \includegraphics[width=\textwidth]{create-vnode}
+    \includegraphics[width=0.9\textwidth]{create-vnode}
     \caption{创建虚拟容器的工作流程}
 \end{figure}
 
@@ -217,7 +217,7 @@ HTTP server 是跑在主节点上的，也就是说，用户在网页端发出�
 因为从节点上挂载的 NFS 目录必须和主节点保持同步，而我们的测试集群使用的是千兆以太网，相对
 于万转的机械硬盘，以太网的吞吐率 (throughput) 是很低的，所以容易成为瓶颈。
 
-\begin{figure}[h]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{image-manager}
     \caption{Tsinghua NOVA 的镜像管理界面}
@@ -235,8 +235,8 @@ testlxc ，里面包含一个 conf.xml 文件和一个 rootfs/ 目录。
 
 \begin{lstlisting}
 testlxc
-├── conf.xml
-└── rootfs/
+|-- conf.xml
+|-- rootfs/
 
 1 directory, 1 file
 \end{lstlisting}
@@ -353,8 +353,7 @@ Tsinghua NOVA 平台在设计的时候，一个很重要的特性就是对虚拟
 当然，目前 Tsinghua NOVA 平台作为一个虚拟化管理系统，在迁移时不能保证完全没有开销。这
 主要是因为 Tsinghua NOVA 是完全没有 replica 的。实现同一服务在不同物理节点之间的
 状态复制 (state machine replication) 和容灾恢复，可以使用 Paxos 协议进行状态同步，
-其中一个对上层服务透明的系统是哥伦比亚大学的 Crane 系统
-\footnote{https://github.com/columbia/crane}~\cite{cui2015p}。
+其中一个对上层服务透明的系统是哥伦比亚大学的 Crane 系统~\cite{cui2015p}。
 
 \subsection{LXC 的迁移和 QEMU-KVM 的迁移的区别}
 
@@ -605,7 +604,7 @@ Tsinghua NOVA 提供的 RPC 机制，也可以使用 ssh 。
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.5\textwidth]{vnode-status}
+    \includegraphics[width=0.8\textwidth]{vnode-status}
     \caption{获取虚拟机状态的基本流程}
 \end{figure}
 
