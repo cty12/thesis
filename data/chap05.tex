@@ -108,7 +108,7 @@ apachectl 可以控制 httpd 的运行与停止，通过 -f 参数可以指定�
 Mongoose 和 Apache httpd 的测试结果分别如表~\ref{tab:mongoose-perf}
 以及~\ref{tab:apache-perf}。
 
-\begin{table}[h]
+\begin{table}[H]
     \centering
     \caption{Mongoose 的性能测试结果}
     \begin{tabular}{||c c c c||}
@@ -128,7 +128,7 @@ Mongoose 和 Apache httpd 的测试结果分别如表~\ref{tab:mongoose-perf}
     \label{tab:mongoose-perf}
 \end{table}
 
-\begin{table}[h]
+\begin{table}[H]
     \centering
     \caption{Apache httpd 的性能测试结果}
     \begin{tabular}{||c c c c||}
@@ -153,7 +153,7 @@ Mongoose 和 Apache httpd 的测试结果分别如表~\ref{tab:mongoose-perf}
 Memcached、Redis 还有 Mysql 的测试情况分别如~\ref{tab:memcached-perf}、
 ~\ref{tab:redis-perf}还有~\ref{tab:mysql-perf}所示：
 
-\begin{table}[h]
+\begin{table}[H]
     \centering
     \caption{Memcached 的性能测试结果}
     \begin{tabular}{||c c c c||}
@@ -167,7 +167,7 @@ Memcached、Redis 还有 Mysql 的测试情况分别如~\ref{tab:memcached-perf}
     \label{tab:memcached-perf}
 \end{table}
 
-\begin{table}[h]
+\begin{table}[H]
     \centering
     \caption{Redis 的性能测试结果}
     \begin{tabular}{||c c c c||}
@@ -175,9 +175,9 @@ Memcached、Redis 还有 Mysql 的测试情况分别如~\ref{tab:memcached-perf}
         FIELD (req/s) & KVM & LXC & BAREMETAL \\
         \hline
         \hline
-        PING_INLINE & 25859.84 & 44365.57 & 49261.09 \\
+        PING\_INLINE & 25859.84 & 44365.57 & 49261.09 \\
         \hline
-        PING_BULK & 31113.88 & 44208.66 & 50968.40 \\
+        PING\_BULK & 31113.88 & 44208.66 & 50968.40 \\
         \hline
         SET & 26096.03 & 48030.74 & 59594.76 \\
         \hline
@@ -197,13 +197,13 @@ Memcached、Redis 还有 Mysql 的测试情况分别如~\ref{tab:memcached-perf}
         \hline
         SPOP & 26253.61 & 46794.57 & 57240.98 \\
         \hline
-        LRANGE_100 & 28232.64 & 28320.59 & 29868.58 \\
+        LRANGE\_100 & 28232.64 & 28320.59 & 29868.58 \\
         \hline
-        LRANGE_300 & 12992.08 & 10736.53 & 12729.12 \\
+        LRANGE\_300 & 12992.08 & 10736.53 & 12729.12 \\
         \hline
-        LRANGE_500 & 9095.04 & 8318.78 & 9489.47 \\
+        LRANGE\_500 & 9095.04 & 8318.78 & 9489.47 \\
         \hline
-        LRANGE_600 & 7808.23 & 7190.62 & 7487.27 \\
+        LRANGE\_600 & 7808.23 & 7190.62 & 7487.27 \\
         \hline
         MSET (10 keys) & 23691.07 & 42936.88 & 57903.88 \\
         \hline
@@ -211,7 +211,7 @@ Memcached、Redis 还有 Mysql 的测试情况分别如~\ref{tab:memcached-perf}
     \label{tab:redis-perf}
 \end{table}
 
-\begin{table}[h]
+\begin{table}[H]
     \centering
     \caption{Mysql 的性能测试结果}
     \begin{tabular}{||c c c c||}
