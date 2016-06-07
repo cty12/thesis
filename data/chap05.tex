@@ -1,9 +1,25 @@
-\chapter{虚拟集群测试套件的设计}
+\chapter{系统的测试与评价}
 
-在本章中，介绍一种基于真实负载类型的虚拟集群测试套件 (benchmark suite) 。这个套件是
-Tsinghua NOVA 项目的一部分，用于对不同的虚拟化技术进行性能和实用性评估。
+\section{不同虚拟化方案对负载性能影响的比较}
 
-\section{负载类型的选择}
+在本节，首先介绍 Tsinghua NOVA 项目中的基准测试套件 Omegabench ，然后通过在不同的
+虚拟化平台上运行同样的模仿真实环境的负载，对不同虚拟化方案的效果和实用性作出评估。
+
+\subsection{实验环境}
+
+实验使用的硬件是一台清华同方“超强”系列的塔式服务器，型号是 TP-240 。具体配置如下：
+
+\begin{lstlisting}
+Tsinghua-Tongfang TP-240 tower server
+    |-- Dual Intel Xeon E5606 @ 2.13 GHz
+    |-- 32 GB DDR3 ECC memory
+    |-- WDC WD10EALX-229
+\end{lstlisting}
+
+宿主机使用的操作系统是 CentOS 7.2 ，也就是目前最新的版本。相应的软件栈也在实验之前更新
+到 Red Hat EPEL 软件仓库中的最新版本。
+
+\subsection{负载类型的选择}
 
 常见的基准测试软件可以按照负载类型分成两类。一种是运行理想化的负载，例如计算圆周率的
 SuperPI 。在实际应用中，恐怕没有用户会每天使用计算机无穷无尽地计算圆周率，所以这种
@@ -27,12 +43,90 @@ SuperPI 。在实际应用中，恐怕没有用户会每天使用计算机无穷
     tar 解包的综合测试。这个测试既考验 CPU 性能也考验磁盘 I/O 性能。
 \end{enumerate}
 
-\section{部署本测试套件}
+\subsection{运行本测试套件}
 
-\subsection{目录结构}
+我们的测试套件的远端仓库 (repository) 托管在 GitHub 上，使用 git 进行版本控制。可以
+以源代码的形式获得这个套件。
 
-\subsection{安装依赖和编译测试服务}
+\subsubsection{目录结构}
 
-\subsection{运行测试程序}
+工程的根目录包含一个叫 tests/ 的目录，和其它若干个以测试用例的名称命名的目录，比如 mongoose/
+和 redis/ 等。tests/ 目录包含了全部测试脚本，和测试使用的配置文件，还有以表格或者图表的形式
+收集测试结果的相关代码。而以测试项目命名的目录中一般有一个用于自动下载和编译安装测试用的服务
+的脚本，还有一个开启服务器的脚本。通过先后运行这两个脚本可以完成测试用服务的自动部署和配置。
+还有一个文件保存编译的时候使用的配置信息，比如服务器软件的版本、所需依赖的版本等。
 
-\section{为套件添加新的测试用例}
+\subsubsection{安装依赖和编译测试服务}
+
+以 Apache httpd 为例，首先通过保管理器安装相关的依赖：
+
+\begin{lstlisting}[language=bash]
+dnf install tar wget # required when using Fedora mininal installation
+dnf install gcc make
+dnf install pcre-devel
+dnf install libxml2-devel
+dnf install xz       # for testing xz and tar
+\end{lstlisting}
+
+然后需要在相应的 shell 配置文件比如 .bashrc 中定义 \$OMEGA_HOME 这个变量：
+
+\begin{lstlisting}[language]
+export OMEGA_HOME="your/preferred/dir/here"
+\end{lstlisting}
+
+然后运行叫做 \$OMEGA_HOME/apache-httpd/download-compile-apache.sh 即可自动完成
+httpd 以及 PHP 解释器的编译安装，而且会自动生成一个测试用的配置文件 httpd.conf 。使用
+apachectl 可以控制 httpd 的运行与停止，通过 -f 参数可以指定配置文件。
+
+\subsubsection{运行测试程序}
+
+仍然以 Apache httpd 举例，通过运行 run-ab-tests.py 可以自动进行基准测试并以列表和
+柱状图的形式显示出性能数据。
+
+相应的测试程序配置文件是 ab-tests-config.json ，一个简单的测试本机的例子如下：
+
+\begin{lstlisting}
+{
+  "ab": "$OMEGA_HOME/apache-httpd/install/bin/ab",
+  "num_req": 128,
+  "concurrency": 8,
+  "port": 7000,
+  "ip_addr": [
+    "127.0.0.1"
+  ]
+}
+\end{lstlisting}
+
+在这个例子中，测试客户端一共向服务器发送 128 个 HTTP 请求 (requests) ，
+并发度 (concurreny level) 是 8 ，连接到服务器的 7000 端口，服务器的 IP 地址是
+127.0.0.1 。
+
+\subsection{实验结果}
+
+Mongoose 的测试结果如表~\ref{tab:mongoose-perf}。
+
+\begin{table}[h]
+    \centering
+    \caption{Mongoose 的性能测试结果}
+    \begin{tabular}{||c c c c||}
+        \hline
+        FIELD & KVM & LXC & BAREMETAL \\
+        \hline
+        \hline
+        Time per request (ms) & 255.608 & 267.923 & 284.447 \\
+        \hline
+        Requests per sec & 31.3 & 29.86 & 28.12 \\
+        \hline
+        Transfer rate (KB/s) & 3.39 & 3.24 & 3.05 \\
+        \hline
+        Time taken (s) & 4.09 & 4.287 & 4.551 \\
+        \hline
+    \end{tabular}
+    \label{tab:mongoose-perf}
+\end{table}
+
+\section{调度性能评估}
+
+\subsection{实验环境}
+
+\subsection{迁移开销}
