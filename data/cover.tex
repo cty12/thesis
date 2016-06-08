@@ -82,11 +82,11 @@ QEMU-KVM 支持较好，而对新兴的虚拟容器技术支持不佳，甚至�
 \begin{eabstract}
 Existing virtual cluster management systems such as OpenStack adopt traditional
 hypervisor QEMU-KVM as the major virtualization driver but provide relatively
-poor support for the emerging \"lightervisor\" technologies such as LXC. Meanwhile
+poor support for the emerging "lightervisor" technologies such as LXC. Meanwhile
 the native user-land tools for LXC, which support nothing but shell commands,
 are simple and user-unfriendly for managing a large cluster of guests.
 
-The LXC driver is added to Tsinghua NOVA so as to resolve the dillemma between
+The LXC driver is added to Tsinghua NOVA so as to resolve the dilemma between
 container technology and large scale cluster management. Tsinghua NOVA is
 capable of hosting a hybrid cluster made of QEMU-KVM enabled guests and
 container enabled guests. The whole system is transparent to end-users.
