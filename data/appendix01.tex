@@ -1,262 +1,210 @@
-\chapter{外文资料原文}
-\label{cha:engorg}
-
-\title{The title of the English paper}
-
-\textbf{Abstract:} As one of the most widely used techniques in operations
-research, \emph{ mathematical programming} is defined as a means of maximizing a
-quantity known as \emph{bjective function}, subject to a set of constraints
-represented by equations and inequalities. Some known subtopics of mathematical
-programming are linear programming, nonlinear programming, multiobjective
-programming, goal programming, dynamic programming, and multilevel
-programming$^{[1]}$.
-
-It is impossible to cover in a single chapter every concept of mathematical
-programming. This chapter introduces only the basic concepts and techniques of
-mathematical programming such that readers gain an understanding of them
-throughout the book$^{[2,3]}$.
-
-
-\section{Single-Objective Programming}
-The general form of single-objective programming (SOP) is written
-as follows,
-\begin{equation}\tag*{(123)} % 如果附录中的公式不想让它出现在公式索引中，那就请
-                             % 用 \tag*{xxxx}
-\left\{\begin{array}{l}
-\max \,\,f(x)\\[0.1 cm]
-\mbox{subject to:} \\ [0.1 cm]
-\qquad g_j(x)\le 0,\quad j=1,2,\cdots,p
-\end{array}\right.
-\end{equation}
-which maximizes a real-valued function $f$ of
-$x=(x_1,x_2,\cdots,x_n)$ subject to a set of constraints.
-
-\newtheorem{mpdef}{Definition}[chapter]
-\begin{mpdef}
-In SOP, we call $x$ a decision vector, and
-$x_1,x_2,\cdots,x_n$ decision variables. The function
-$f$ is called the objective function. The set
-\begin{equation}\tag*{(456)} % 这里同理，其它不再一一指定。
-S=\left\{x\in\Re^n\bigm|g_j(x)\le 0,\,j=1,2,\cdots,p\right\}
-\end{equation}
-is called the feasible set. An element $x$ in $S$ is called a
-feasible solution.
-\end{mpdef}
-
-\newtheorem{mpdefop}[mpdef]{Definition}
-\begin{mpdefop}
-A feasible solution $x^*$ is called the optimal
-solution of SOP if and only if
-\begin{equation}
-f(x^*)\ge f(x)
-\end{equation}
-for any feasible solution $x$.
-\end{mpdefop}
-
-One of the outstanding contributions to mathematical programming was known as
-the Kuhn-Tucker conditions\ref{eq:ktc}. In order to introduce them, let us give
-some definitions. An inequality constraint $g_j(x)\le 0$ is said to be active at
-a point $x^*$ if $g_j(x^*)=0$. A point $x^*$ satisfying $g_j(x^*)\le 0$ is said
-to be regular if the gradient vectors $\nabla g_j(x)$ of all active constraints
-are linearly independent.
-
-Let $x^*$ be a regular point of the constraints of SOP and assume that all the
-functions $f(x)$ and $g_j(x),j=1,2,\cdots,p$ are differentiable. If $x^*$ is a
-local optimal solution, then there exist Lagrange multipliers
-$\lambda_j,j=1,2,\cdots,p$ such that the following Kuhn-Tucker conditions hold,
-\begin{equation}
-\label{eq:ktc}
-\left\{\begin{array}{l}
-    \nabla f(x^*)-\sum\limits_{j=1}^p\lambda_j\nabla g_j(x^*)=0\\[0.3cm]
-    \lambda_jg_j(x^*)=0,\quad j=1,2,\cdots,p\\[0.2cm]
-    \lambda_j\ge 0,\quad j=1,2,\cdots,p.
-\end{array}\right.
-\end{equation}
-If all the functions $f(x)$ and $g_j(x),j=1,2,\cdots,p$ are convex and
-differentiable, and the point $x^*$ satisfies the Kuhn-Tucker conditions
-(\ref{eq:ktc}), then it has been proved that the point $x^*$ is a global optimal
-solution of SOP.
-
-\subsection{Linear Programming}
-\label{sec:lp}
-
-If the functions $f(x),g_j(x),j=1,2,\cdots,p$ are all linear, then SOP is called
-a {\em linear programming}.
-
-The feasible set of linear is always convex. A point $x$ is called an extreme
-point of convex set $S$ if $x\in S$ and $x$ cannot be expressed as a convex
-combination of two points in $S$. It has been shown that the optimal solution to
-linear programming corresponds to an extreme point of its feasible set provided
-that the feasible set $S$ is bounded. This fact is the basis of the {\em simplex
-  algorithm} which was developed by Dantzig as a very efficient method for
-solving linear programming.
-\begin{table}[ht]
-\centering
-  \centering
-  \caption*{Table~1\hskip1em This is an example for manually numbered table, which
-    would not appear in the list of tables}
-  \label{tab:badtabular2}
-  \begin{tabular}[c]{|m{1.5cm}|c|c|c|c|c|c|}\hline
-    \multicolumn{2}{|c|}{Network Topology} & \# of nodes &
-    \multicolumn{3}{c|}{\# of clients} & Server \\\hline
-    GT-ITM & Waxman Transit-Stub & 600 &
-    \multirow{2}{2em}{2\%}&
-    \multirow{2}{2em}{10\%}&
-    \multirow{2}{2em}{50\%}&
-    \multirow{2}{1.2in}{Max. Connectivity}\\\cline{1-3}
-    \multicolumn{2}{|c|}{Inet-2.1} & 6000 & & & &\\\hline
-    \multirow{2}{1.5cm}{Xue} & Rui  & Ni &\multicolumn{4}{c|}{\multirow{2}*{\thuthesis}}\\\cline{2-3}
-    & \multicolumn{2}{c|}{ABCDEF} &\multicolumn{4}{c|}{} \\\hline
-\end{tabular}
-\end{table}
-
-Roughly speaking, the simplex algorithm examines only the extreme points of the
-feasible set, rather than all feasible points. At first, the simplex algorithm
-selects an extreme point as the initial point. The successive extreme point is
-selected so as to improve the objective function value. The procedure is
-repeated until no improvement in objective function value can be made. The last
-extreme point is the optimal solution.
-
-\subsection{Nonlinear Programming}
-
-If at least one of the functions $f(x),g_j(x),j=1,2,\cdots,p$ is nonlinear, then
-SOP is called a {\em nonlinear programming}.
-
-A large number of classical optimization methods have been developed to treat
-special-structural nonlinear programming based on the mathematical theory
-concerned with analyzing the structure of problems.
-\begin{figure}[h]
-  \centering
-  \includegraphics{thu-lib-logo}
-  \caption*{Figure~1\quad This is an example for manually numbered figure,
-    which would not appear in the list of figures}
-  \label{tab:badfigure2}
-\end{figure}
-
-Now we consider a nonlinear programming which is confronted solely with
-maximizing a real-valued function with domain $\Re^n$.  Whether derivatives are
-available or not, the usual strategy is first to select a point in $\Re^n$ which
-is thought to be the most likely place where the maximum exists. If there is no
-information available on which to base such a selection, a point is chosen at
-random. From this first point an attempt is made to construct a sequence of
-points, each of which yields an improved objective function value over its
-predecessor. The next point to be added to the sequence is chosen by analyzing
-the behavior of the function at the previous points. This construction continues
-until some termination criterion is met. Methods based upon this strategy are
-called {\em ascent methods}, which can be classified as {\em direct methods},
-{\em gradient methods}, and {\em Hessian methods} according to the information
-about the behavior of objective function $f$. Direct methods require only that
-the function can be evaluated at each point. Gradient methods require the
-evaluation of first derivatives of $f$. Hessian methods require the evaluation
-of second derivatives. In fact, there is no superior method for all
-problems. The efficiency of a method is very much dependent upon the objective
-function.
-
-\subsection{Integer Programming}
-
-{\em Integer programming} is a special mathematical programming in which all of
-the variables are assumed to be only integer values. When there are not only
-integer variables but also conventional continuous variables, we call it {\em
-  mixed integer programming}. If all the variables are assumed either 0 or 1,
-then the problem is termed a {\em zero-one programming}. Although integer
-programming can be solved by an {\em exhaustive enumeration} theoretically, it
-is impractical to solve realistically sized integer programming problems. The
-most successful algorithm so far found to solve integer programming is called
-the {\em branch-and-bound enumeration} developed by Balas (1965) and Dakin
-(1965). The other technique to integer programming is the {\em cutting plane
-  method} developed by Gomory (1959).
-
-\hfill\textit{Uncertain Programming\/}\quad(\textsl{BaoDing Liu, 2006.2})
-
-\section*{References}
-\noindent{\itshape NOTE: These references are only for demonstration. They are
-  not real citations in the original text.}
-
-\begin{translationbib}
-\item Donald E. Knuth. The \TeX book. Addison-Wesley, 1984. ISBN: 0-201-13448-9
-\item Paul W. Abrahams, Karl Berry and Kathryn A. Hargreaves. \TeX\ for the
-  Impatient. Addison-Wesley, 1990. ISBN: 0-201-51375-7
-\item David Salomon. The advanced \TeX book.  New York : Springer, 1995. ISBN:0-387-94556-3
-\end{translationbib}
-
 \chapter{外文资料的调研阅读报告或书面翻译}
 
-\title{英文资料的中文标题}
+\title{Xen 与虚拟化的艺术}
 
-{\heiti 摘要：} 本章为外文资料翻译内容。如果有摘要可以直接写上来，这部分好像没有
-明确的规定。
+{\heiti 摘要：} 人们设计了无数的系统以通过虚拟化技术分享现代计算机的充足的计算资源。
+其中，有的系统需要特制的硬件，或者不能运行日常使用的操作系统；有的为了百分之百的二进制兼容
+不得不以性能作为代价；还有的为了性能好牺牲了安全性和功能性。只有很少的一部分提供资源隔离和
+性能的保障，大多数只提供“尽力而为”的表现，承担着很高的拒绝服务风险。
 
-\section{单目标规划}
-北冥有鱼，其名为鲲。鲲之大，不知其几千里也。化而为鸟，其名为鹏。鹏之背，不知其几
-千里也。怒而飞，其翼若垂天之云。是鸟也，海运则将徙于南冥。南冥者，天池也。
-\begin{equation}\tag*{(123)}
- p(y|\mathbf{x}) = \frac{p(\mathbf{x},y)}{p(\mathbf{x})}=
-\frac{p(\mathbf{x}|y)p(y)}{p(\mathbf{x})}
-\end{equation}
+在本文中，一个叫做 Xen 的 X86 虚拟化管理程序被提出出来。它使多个常见的操作系统可以以安全、
+资源可控而且性能功能都有保障的方式，共享传统的硬件设备。这是通过提供理想化的虚拟机抽象达到的，
+常见的操作系统例如 Linux 、 BSD 还有 Windows XP 可以只需很少的努力移植到这个平台。
 
-吾生也有涯，而知也无涯。以有涯随无涯，殆已！已而为知者，殆而已矣！为善无近名，为
-恶无近刑，缘督以为经，可以保身，可以全生，可以养亲，可以尽年。
+我们的设计指标允许多达 100 台虚拟机实例在一台物理服务器主机上同时运行。我们采用的虚拟化方法
+是非常高效的，例如 Linux 和 Windows XP 的操作系统可以在我们的平台上以极少的性能开销共同
+运行——相较于直接运行在物理机上只有百分之个位数的开销。无论在微基准测试，还是在全系统的测试上，
+我们的系统都极大地超越了与其竞争的商业和免费的现有解决方案。
 
-\subsection{线性规划}
-庖丁为文惠君解牛，手之所触，肩之所倚，足之所履，膝之所倚，砉然响然，奏刀騞然，莫
-不中音，合于桑林之舞，乃中经首之会。
-\begin{table}[ht]
-\centering
-  \centering
-  \caption*{表~1\hskip1em 这是手动编号但不出现在索引中的一个表格例子}
-  \label{tab:badtabular3}
-  \begin{tabular}[c]{|m{1.5cm}|c|c|c|c|c|c|}\hline
-    \multicolumn{2}{|c|}{Network Topology} & \# of nodes &
-    \multicolumn{3}{c|}{\# of clients} & Server \\\hline
-    GT-ITM & Waxman Transit-Stub & 600 &
-    \multirow{2}{2em}{2\%}&
-    \multirow{2}{2em}{10\%}&
-    \multirow{2}{2em}{50\%}&
-    \multirow{2}{1.2in}{Max. Connectivity}\\\cline{1-3}
-    \multicolumn{2}{|c|}{Inet-2.1} & 6000 & & & &\\\hline
-    \multirow{2}{1.5cm}{Xue} & Rui  & Ni &\multicolumn{4}{c|}{\multirow{2}*{\thuthesis}}\\\cline{2-3}
-    & \multicolumn{2}{c|}{ABCDEF} &\multicolumn{4}{c|}{} \\\hline
-\end{tabular}
-\end{table}
+\section{引言}
 
-文惠君曰：“嘻，善哉！技盖至此乎？”庖丁释刀对曰：“臣之所好者道也，进乎技矣。始臣之
-解牛之时，所见无非全牛者；三年之后，未尝见全牛也；方今之时，臣以神遇而不以目视，
-官知止而神欲行。依乎天理，批大郤，导大窾，因其固然。技经肯綮之未尝，而况大坬乎！
-良庖岁更刀，割也；族庖月更刀，折也；今臣之刀十九年矣，所解数千牛矣，而刀刃若新发
-于硎。彼节者有间而刀刃者无厚，以无厚入有间，恢恢乎其于游刃必有余地矣。是以十九年
-而刀刃若新发于硎。虽然，每至于族，吾见其难为，怵然为戒，视为止，行为迟，动刀甚微，
-謋然已解，如土委地。提刀而立，为之而四顾，为之踌躇满志，善刀而藏之。”
+现代的计算机足够强大，可以通过虚拟化技术启动许多小的“虚拟机”，并在每个虚拟机上运行一个独立的
+操作系统实例。这导致了虚拟化技术研究兴趣的回潮。在本文中，我们提出了 Xen ，一个高性能、资源
+可控的虚拟机管理程序，它可以支持服务器联合、协同托管服务、分布式 web 服务、安全计算平台和
+应用程序移动性等多种应用。
 
-文惠君曰：“善哉！吾闻庖丁之言，得养生焉。”
+成功地将一台主机划分成并行执行的多个操作系统具有以下几个挑战：首先，虚拟机必须保证互相隔离，
+它们的执行过程互相影响是不能接受的。尤其是在虚拟机被多个互相不信任的用户共同使用的情况下。
+其次，必须支持多种操作系统，才能适应流行的应用程序的多样性。最后，虚拟化带来的开销应该尽可能小。
 
+Xen 可以承载常见的操作系统，尽管需要进行源代码的更改。本文中描述和评估的 Xen 样本支持多个
+并行执行的 XenoLinux 客户操作系统实例，每个实例向上对应用程序提供和非虚拟化的 Linux 2.4
+完全相同的二进制接口。我们对 Windows XP 的移植虽然是不完整的，但是已经可以运行简单的用户态
+应用程序。我们还在移植 NetBSD 操作系统。
 
-\subsection{非线性规划}
-孔子与柳下季为友，柳下季之弟名曰盗跖。盗跖从卒九千人，横行天下，侵暴诸侯。穴室枢
-户，驱人牛马，取人妇女。贪得忘亲，不顾父母兄弟，不祭先祖。所过之邑，大国守城，小
-国入保，万民苦之。孔子谓柳下季曰：“夫为人父者，必能诏其子；为人兄者，必能教其弟。
-若父不能诏其子，兄不能教其弟，则无贵父子兄弟之亲矣。今先生，世之才士也，弟为盗
-跖，为天下害，而弗能教也，丘窃为先生羞之。丘请为先生往说之。”
-\begin{figure}[h]
-  \centering
-  \includegraphics{thu-whole-logo}
-  \caption*{图~1\hskip1em 这是手动编号但不出现索引中的图片的例子}
-  \label{tab:badfigure3}
-\end{figure}
+Xen 允许用户动态地实例化一个操作系统，使其可以在用户希望的任何地方运行。在 XenoLinux
+项目中，我们在互联网提供商和互联网交换机的较为经济的位置上的物理节点上部署了 Xen 系统。
+我们在它开启新的虚拟机前进行了准入控制，并且希望每个虚拟机为它所需的资源付出相应的“代价”。
+我们会在另外的地方从这个角度讨论我们的想法和实现方法，本文更多地还是关注虚拟机管理程序本身。
 
-柳下季曰：“先生言为人父者必能诏其子，为人兄者必能教其弟，若子不听父之诏，弟不受
-兄之教，虽今先生之辩，将奈之何哉？且跖之为人也，心如涌泉，意如飘风，强足以距敌，
-辩足以饰非。顺其心则喜，逆其心则怒，易辱人以言。先生必无往。”
+在一个共享的物理系统上部署多种应用程序和服务有很多种方法，其中很可能是最简单的一种就是部署
+多个主机，每个运行一个标准的如 Linux 或者 Windows 的操作系统，然后用户可以安装文件、
+开启程序，应用程序之间的保护机制是由传统的操作系统技术实现的。经验表明，如果这样做，系统
+管理工作很快就会变成一项耗时的任务，因为本该互相隔离的应用程序之间复杂的交互配置。
 
-孔子不听，颜回为驭，子贡为右，往见盗跖。
+更重要的是，这种系统支持的性能隔离还不够——一个进程的调度优先顺序、内存需求、网络流量还有
+磁盘访问会直接影响其它程序的。对于事先规划好的固定的用户群体，这个也许是可以接受的（比如
+网格计算或者实验性的 PlanetLab 平台），但是如果资源被过度订阅，或者用户互相协作不愉快，
+那么这个模式就不可行。
 
-\subsection{整数规划}
-盗跖乃方休卒徒大山之阳，脍人肝而餔之。孔子下车而前，见谒者曰：“鲁人孔丘，闻将军
-高义，敬再拜谒者。”谒者入通。盗跖闻之大怒，目如明星，发上指冠，曰：“此夫鲁国之
-巧伪人孔丘非邪？为我告之：尔作言造语，妄称文、武，冠枝木之冠，带死牛之胁，多辞缪
-说，不耕而食，不织而衣，摇唇鼓舌，擅生是非，以迷天下之主，使天下学士不反其本，妄
-作孝弟，而侥幸于封侯富贵者也。子之罪大极重，疾走归！不然，我将以子肝益昼餔之膳。”
+一个解决方式是翻新操作系统本身对于性能隔离的支持。Resource container 技术、Linux/RK 、
+QLinux 和 SILK 或多或少都表现出这个思想。一个主要的困难是保证所有资源占用的帐都记到正确的
+那个进程的头上——尤其是考虑到例如缓冲区缓存或者页置换算法导致的应用程序之间复杂的交互。在
+操作系统内部这是被称为“QoS crosstalk“的问题。降低复用率可以缓解这个问题，正如 Exokernel
+和 Nemesis 操作系统展示的那样。在它们的实现中非刻意的或者不需要的进程间交互被降低到了最低。
 
+我们使用类似的基本方法来创造 Xen ，在 Xen 中物理资源被以整个操作系统的粒度进行复用，
+并且能提供它们之间的性能隔离。和进程级的复用不同的是，这种复用允许多个不同的客户操作系统
+优雅地共同存在，而不是使用同一个应用层二进制接口。当然，这样的灵活性肯定要付出代价——运行整个
+完整的操作系统肯定比运行单个进程更加“重量”，无论是从开机启动来说，还是从资源消耗来讲。
 
-\chapter{其它附录}
-前面两个附录主要是给本科生做例子。其它附录的内容可以放到这里，当然如果你愿意，可
-以把这部分也放到独立的文件中，然后将其 \cs{input} 到主文件中。
+对于我们的目标也就是多达 100 个承载的虚拟机实例，我们相信上述代价是值得的，因为它单个用户
+以资源可控制的方式运行未经修改的二进制或者一族二进制程序，例如一个 Apache 服务再加上一个
+PostgreSQL 后端）。另外，它还提供了极致的灵活性，因为用户可以精确地恰到好处地创建那个
+应用需要的运行环境。麻烦的在多个服务和应用之间的配置协调被避免了（比如说，每个 Windows 实例
+可以维护自己独立的注册表）。
+
+本论文的如下部分这样组织：在第二章我们介绍实现虚拟化的具体方法和 Xen 的基本工作原理。
+在第三章介绍我们的设计和实现的一些关键细节。在第四章我们使用工业界标准的基准测试程序对在
+Xen 上运行的 XenoLinux 内核与在物理机上运行的 Linux 内核、VMWare Workstation 还有
+用户态 Linux (UML) 进行比较测试。第五章评价相关工作。第六章介绍后续工作和结论。
+
+\section{Xen: 方法与概述}
+
+在传统的虚拟机管理程序里，虚拟化软件对上层暴露出和下层的硬件完全相同的功能。尽管全虚拟化
+有着显而易见的优点，也就是允许未经修改的操作系统在上面运行，但是它有几个缺点。对于流行的
+IA-32 / X86 架构来说，更是如此。
+
+对于全虚拟化的支持从来就不是 X86 体系结构的一部分。特定的内核指令必须经过虚拟机管理程序的
+处理才能实现正确的虚拟化，但是在不足的权限下运行这些指令会悄无声息地失败，而不是导致易于
+处理的陷入。高效率地将 X86 的 MMU 进行虚拟化也是非常困难的。这些问题当然都可以被解决，
+只不过需要以增加的复杂度和降低的效率作为代价。VMWare 的 ESX Server 自动地重写一部分客户机
+的代码来插入陷入，每当虚拟机管理程序必须介入执行的时候。这个翻译过程必须应用到整个客户机的
+操作系统内核上（带来相应的翻译、执行、缓存的开销）因为所有不会带来陷入的特权指令必须被
+捕获和处理。ESX Server 还实现了系统数据结构比如页表的一个“影子”版本，并且通过陷入每个
+更新操作维护虚拟页表的一致性——这个实现方法对于更新频繁的操作，比如创建一个新的应用程序进程
+带来了非常大的开销。
+
+难以忍受 X86 错综复杂的特性，存在其它反对全虚拟化的讨论。特别是有客户虚拟机想要既能看到真实
+的硬件资源又能看到虚拟的硬件资源的实际的应用情况，例如既提供实际的时钟又提供虚拟的时钟可以使
+客户虚拟机更好地支持时间敏感的任务，使其准确地处理 TCP 超时以及 RTT 估计，又比如暴露出
+物理机的实际地址允许客户机通过使用 superpages 和 page coloring 技术获得更好的性能表现。
+
+我们通过提供一个和下层的硬件类似但是又不完全相同的虚拟机抽象来避免全虚拟化的缺陷——这种方法
+被称为“半虚拟化”。这种方法会带来更高的性能，尽管需要修改客户机的操作系统。但是请注意，
+我们不需要修改应用程序的二进制接口 ABI ，所以上层应用无须做修改。
+
+我们将上述讨论总结为如下几个原则：
+
+\begin{enumerate}
+    \item 支持未经修改的应用程序二进制文件至关重要，否则用户就不会迁移到 Xen 。
+    因此我们必须将现有的 ABI 的全部结构特性进行虚拟化；
+    \item 支持完整的多任务操作系统是重要的，因为这样可以允许复杂的服务设置在单一的客户机
+    操作系统实例内被虚拟化；
+    \item 在 X86 这种虚拟化不友好的平台上，半虚拟化是必须的，因为通过它可以获得高性能
+    和强的资源隔离；
+    \item 即便在虚拟化友好的硬件架构上，完全地对客户操作系统隐藏虚拟化的效用也会带来正确性
+    与性能的风险。
+\end{enumerate}
+
+注意，我们的 X86 半虚拟化抽象和最近的 Denali 项目提出的设计非常不同。Denali 被设计用来
+支持数以千计的运行网络服务的虚拟机，它们中大多数都规模不大并且也不流行。形成对比的是，Xen
+的设计目标是支持多达 100 个运行行业标准的应用与服务的虚拟机。因为目标非常不同，将 Denali
+的设计方法和我们的原理作对比是有益的。
+
+首先，Denali 的目标不在于已有的 ABI ，所以可以从虚拟机接口中忽略一部分结构特性。
+举例来说，Denali 并不完全支持 X86 的分段机制，尽管它在 NetBSD 、Linux 和 Windows XP
+的 ABI 中广泛使用。
+
+其次，Denali 的实现方法没有解决支持应用程序复用或者一个客户操作系统的不同的地址空间的问题。
+应用程序被以类似 Exokernel 中的 libOS 的形式显式地链接向一个 Ilwaco 客户操作系统的实例。
+因此，每个虚拟机只能承载一个单用户模式的单应用的未经保护的所谓“操作系统”。形成对比的是，
+在 Xen 中，一个虚拟机可以承载一个真正的操作系统，在这个操作系统上又可以复用出成千上万的
+未经修改的用户态进程。尽管一个原型虚拟 MMU 被开发出来用于帮助 Denali 达到类似的目标，
+但是我们没有看到任何已发表的技术细节或者评估报告。
+
+再次，在 Denali 的架构中虚拟机管理程序通过磁盘输入输出操作所有分页机制。这可能是因为在
+虚拟化层缺少内存管理机制。在虚拟机管理程序内部解决分页机制和我们的进行性能隔离的目标向左：
+恶意的虚拟机会激励内存抖动，不公平地把别的虚拟机的 CPU 时间和磁盘带宽据为己有。在 Xen 系统中
+我们希望每个客户机都有自己的分页机制，使用自己分配到的那一份内存空间和磁盘份额。
+
+最后，Denali 将每台机器的资源的命名空间进行了虚拟化，采用了如果一台虚拟机不能对另一台虚拟机
+的资源进行命名那么就无法访问该资源的方式。举例来说，虚拟机们对硬件地址一无所知，它们只知道
+Denali 为它们创建的虚拟地址。相反，我们认为虚拟机管理程序内部的安全访问管理对于保护来说
+已经足够了，另外，正如上文讨论过的，如果使物理资源被客户操作系统直接访问会带来很激烈的正确性
+与性能的争论。
+
+在下面的一节中我们讨论 Xen 的虚拟机抽象，并讨论 Xen 如何通过修改客户操作系统来达到这一点的。
+注意，在本文中，我们使用术语“客户操作系统”来指代 Xen 可以承载的操作系统之一，使用“域”来指代
+一个运行着某个“客户操作系统”的虚拟机；这个区别好似在传统的系统中程序与进程的概念。我们管 Xen
+本身叫做虚拟机管理程序 (hypervisor) 因为它执行的特权级相对于它承载的客户操作系统的内核更高。
+
+\subsection{虚拟机接口}
+
+表 1 展示了 X86 半虚拟化接口的一个概览，主要可以划分为三个大块：内存管理、CPU 还有
+输入输出设备。在下面的章节我们依次介绍三个子系统，并讨论每个部分是如何在我们的半虚拟化架构中
+被表示的。注意，尽管我们的实现中的一部分，比如内存管理，是特定地针对 X86 平台的，许多方面
+例如虚拟 CPU 和输入输出设备可以直接应用到别的体系结构上。另外，X86 体系结构代表了它区别于
+RISC 体系结构的最坏的一种可能性，比如说，有效地将硬件页表虚拟化比将软件控制的 TLB
+虚拟化要更加复杂。
+
+\subsubsection{内存管理}
+
+将内存虚拟化毫无疑问是将体系结构半虚拟化中最困难的部分，无论是从虚拟机管理程序的原理上讲，
+还是从每种客户操作系统被移植的工作量上讲。如果体系结构本身提供一个软件管理的 TLB 那么这个
+工作就更加容易了，因为这样的结构能简单有效地被虚拟化。TLB 标记是另一种被多数服务器级的 RISC
+体系结构支持的有用的功能，比方说 Alpha 、MIPS 还有 SPARC 。将地址空间标志位同每个 TLB
+表项联系起来使得虚拟机管理程序与每个客户操作系统有效地在分开的地址空间里共同存在，因为在二者
+转换执行的时候就没有必要清空掉整个 TLB 了。
+
+遗憾的是，X86 并没有软件控制的 TLB ，与此相反的是 TLB 缺失被 CPU 本身以遍历整个页表结构
+的形式自动处理。因此为了达到最好的性能，所有有效的对于当前的地址空间内的页地址转换都需要在硬件
+可访问的页表中存在。另外，因为 TLB 没有标记，地址空间转换通常需要清空整个 TLB 。基于这些限制，
+我们作出了两个决定：(1) 客户操作系统负责分配和管理硬件页表，Xen 的介入非常至少来保证安全性
+和隔离性；(2) Xen 在每段地址空间的上 64 MB 存在，因此避免进入退出虚拟机管理程序造成的 TLB
+清空。
+
+每次一个客户操作系统需要一个新的页表——也许是因为一个新的进程创建了——它从它自己的内存保留
+区域内分配并初始化一页并在 Xen 上做登记。此时，操作系统必须放弃对页表所在的内存区域直接写入
+的权限，之后所有的更新都需要被 Xen 批准。更新在几个方面被限制，包括只允许操作系统对它拥有的页
+进行映射，并且禁用页表的可写入映射。客户操作系统可以通过一次送入一批更新请求的方式来减少进入
+虚拟机管理程序的开销。每个地址空间上方 64MB 预留给 Xen ，对于客户操作系统是不可访问或者
+重新映射的。这个地址区域不被任何常见的 X86 ABI 使用，所以这个限制不会影响应用程序的兼容性。
+
+分段被用类似的方式进行虚拟化，就是批准对硬件段描述符表的更新。X86 里的段描述符惟独的限制是：
+(1) 它们的特权级比 Xen 低；(2) 它们不允许任何对 Xen 预留的地址空间的访问。
+
+\subsubsection{CPU}
+
+对 CPU 进行虚拟化对于客户操作系统来说有几个含义：首先，在客户操作系统下方插入虚拟机管理程序
+和传统意义上的“操作系统才是特权最高的”的概念相违背。为了保护虚拟机管理程序免于操作系统的
+异常行为（以及域与域之间的隔离），客户操作系统必须进行修改在更低的特权级上运行。
+
+很多的处理器体系结构只提供两个特权级。在这种情况下，客户操作系统会与应用程序一起共享较低的
+特权级。客户操作系统通过在与应用程序不同的地址空间里运行而把自己保护起来，通过虚拟机管理程序
+设置虚拟的特权级和改换当前地址空间从而间接地与应用程序交替运行。如果处理器的 TLB 支持地址空间
+标记，那么代价昂贵的 TLB 清空就可以被避免了。
+
+高效地将特权级进行虚拟化在 X86 上是可行的，因为它在硬件层面支持四个不同的特权级。X86 的特权级
+一般被称为 rings ，从 0 到 3 。操作系统的代码通常在 ring 0 执行，因为其它的 ring 都不能
+执行特权指令，而 ring 3 一般被应用程序的代码使用。据我们所知，ring 1 和 ring 2 自从 OS/2
+就没有被任何著名的 X86 操作系统使用过。任何符合这个特点的操作系统都可以被移植到 Xen 上通过
+修改以在 ring 1 里运行。这可以防止客户操作系统直接运行特权指令，并且可以和 ring 3 上运行的
+应用程序隔离开来。
+
+特权指令通过在 Xen 内部批准和执行来半虚拟化。这些适用于类似创建一个新的页表或者在空闲时放弃
+CPU 资源等操作。任何客户操作系统的直接执行特权指令的尝试都会被处理器本身拒绝掉，或者是静默地
+或者产生一个错误，因为只有 Xen 本身才能在一个权限足够的层级运行。
+
+异常，包括内存异常和软件的陷入，在 X86 上的虚拟化都十分直接。描述每种异常的处理程序的表在
+Xen 上登记待批准。这些在表中声明的处理程序基本上和对于真实 X86 硬件的相同。这是可行的，
+因为在我们的半虚拟化架构中异常的栈帧没有被修改。唯一的修改是对于缺页异常的处理程序，它通常是
+从特权寄存器 CR2 中读取缺页的地址，但是因为这是不可能的，我们把它写在了一个扩展的栈帧里。
+每当一个异常发生在在 ring 0 外执行，Xen 的处理程序创建客户操作系统上异常栈帧的一个拷贝，
+然后把控制权交给注册的处理程序。
+
+通常，只有两类异常的发生会频繁到影响系统性能的地步：系统调用（它们通常是通过软件异常实现的）
+还有缺页异常。我们通过允许每个客户机操作系统注册一个“快的”异常处理程序，它可以被处理器直接访问
+而不是间接通过 ring 0，来提高系统调用的性能。这个处理程序在被写到硬件异常表中之前就被有效化了。
+遗憾的是，不能对缺页处理程序使用相同的技术，因为只有 ring 0 里执行的代码才能访问 CR2 里
+存储的缺页地址，缺页异常必须通过 Xen 被传送一次，使得寄存器的值能从 ring 1 中访问。
