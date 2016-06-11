@@ -43,6 +43,48 @@ SuperPI 。在实际应用中，恐怕没有用户会每天使用计算机无穷
     tar 解包的综合测试。这个测试既考验 CPU 性能也考验磁盘 I/O 性能。
 \end{enumerate}
 
+\subsection{资源限制}
+
+在这一小节，我们说明本次实验对于 LXC 与 KVM 两种虚拟化平台的配置是公平的。
+
+在 LXC 虚拟容器中，我们通过修改容器的配置文件来对其进行内存的配额限制。在
+~\ref{subsubsec:cgroup}小节提到过，现代的 Linux 内核可以通过 cgroup 进行进程组的资源
+调配，所以在这里，我们就要修改 cgroup 的相关参数。
+
+以名为 test-fedora-1 的容器举例，修改配置文件，添加：
+
+\begin{lstlisting}
+# limit memory
+lxc.cgroup.memory.limit_in_bytes = 8G
+lxc.cgroup.memory.memsw.limit_in_bytes = 10G
+\end{lstlisting}
+
+就可以将总内存限制为 8GB ，内存加 swap 限制为 10GB 。配置文件修改后的 LXC 容器启动日志
+如下\footnote{日志较长，这里只提取了关键信息}：
+
+\begin{lstlisting}
+cgfs.c:do_setup_cgroup_limits:1922 - cgroup 'devices.allow' set to 'c 5:2 rwm'
+cgfs.c:do_setup_cgroup_limits:1922 - cgroup 'memory.limit_in_bytes' set to '8G'
+cgfs.c:do_setup_cgroup_limits:1922 - cgroup 'memory.memsw.limit_in_bytes' set to '10G'
+cgfs.c:do_setup_cgroup_limits:1926 - cgroup has been setup
+\end{lstlisting}
+
+也可以从文件中读取。注意因为 /proc/meminfo 没有对 cgroup 进行过优化，所以它读出来的
+内存信息是宿主机的总内存容量而不是容器内部限制使用的配额：
+
+\begin{lstlisting}
+[root@test-fedora-1 ~]# cat /sys/fs/cgroup/memory/lxc/test-fedora-1/memory.limit_in_bytes
+8589934592
+[root@test-fedora-1 ~]# cat /sys/fs/cgroup/memory/lxc/test-fedora-1/memory.memsw.limit_in_bytes
+10737418240
+\end{lstlisting}
+
+可见，此时该虚拟容器 test-fedora-1 的内存资源已得到了限制。使用类似的方法可以对 CPU 数量
+等关键参数进行设置，在本次实验中，因为 LXC 与 KVM 的性能测试是先后而不是同时运行，所以二者
+的设置都是使用宿主机全部的 CPU 个数。
+
+% TODO 增加 KVM 的限制方法
+
 \subsection{运行本测试套件}
 
 我们的测试套件的远端仓库 (repository) 托管在 GitHub 上，使用 git 进行版本控制。可以
@@ -276,6 +318,23 @@ Dell PowerEdge R720
 
 \subsection{迁移开销}
 
+在迁移的实验中，我们使用理想化的负载 toy.py ，它的作用是不断把内存中的一个计数变量写入磁盘
+块设备中的文件 testfile ，通过查看 testfile 中的数字可以判断实时迁移 (live migration)
+是否成功。
+
+\begin{lstlisting}[language=Python]
+#!/usr/bin/python2.7
+import time
+
+data = 42
+
+while(True):
+    with open("testfile", "w+") as f:
+        f.write(str(data) + '\n')
+    data += 1
+    time.sleep(10)
+\end{lstlisting}
+
 通过在 Tsinghua NOVA 系统中打印日志的形式进行测量。一次运行的结果如下：
 
 \begin{lstlisting}
@@ -293,3 +352,4 @@ Dell PowerEdge R720
 迁移过后的虚拟容器中 restore 负载进程需要 27 秒左右。整个过程存在大约 40 秒的开销。
 
 % TODO 在这里测量一下创建虚拟机的开销
+% TODO 和 KVM 的作对比

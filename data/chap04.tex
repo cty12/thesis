@@ -596,6 +596,29 @@ Tsinghua NOVA 提供的 RPC 机制，也可以使用 ssh 。
     \caption{实时迁移的实现}
 \end{algorithm}
 
+\subsection{迁移类型的配置}
+
+在 Tsinghua NOVA 中，通过 *.properties 文件可以很方便地为各项参数进行配置，迁移也不例外。
+使用 \$NOVA\_HOME/conf/nova.lxc-cr.properties 可以对 LXC 迁移进行配置：
+
+\begin{lstlisting}
+######################################
+# the lxc checkpoint/restore section #
+######################################
+
+# the name of the payload process
+payload_process.name=toy.py
+# migration type: 'live' or 'offline'
+migration_type=offline
+# username of the container
+username=root
+# password
+passwd=940715
+\end{lstlisting}
+
+其中，payload\_process.name 是容器中负载应用程序的进程名字，migration\_type 选择是否是
+实时迁移，username 和 passwd 是虚拟容器的用户名密码。
+
 \section{实时获取准确的虚拟机 IP 地址}
 
 原先 Tsinghua NOVA 系统的虚拟机 IP 地址是从主节点运行的数据库服务上获得的，而且这个 IP
