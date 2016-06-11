@@ -13,7 +13,8 @@
 这就导致了多个用户可以同时使用同一个计算资源——例如一台电子计算机——的分时系统
 ~\cite{timesharing}的产生。所谓分时系统，就是有一个主要的
 计算系统 (例如大型机，mainframe computer) ，用户通过终端机 (terminal) 连接到这个
-系统上使用计算资源。用户一般而言不需要考虑计算机操作系统乃至硬件的具体细节——因为自然
+系统上使用计算资源。如图~\ref{fig:unix-time-sharing}所示，威斯康星-麦迪逊分校的学生在
+使用终端。用户一般而言不需要考虑计算机操作系统乃至硬件的具体细节——因为自然
 有管理员管理这些细节，只需要像“租客”一样使用计算资源就可以了。现代的操作系统，
 例如 GNU/Linux 或者 Microsoft Windows ，都支持多用户模式。
 
@@ -21,6 +22,7 @@
     \centering
     \includegraphics[width=0.7\textwidth]{unix_time_sharing}
     \caption{威斯康辛大学麦迪逊分校的学生使用终端机，1978 年}
+    \label{fig:unix-time-sharing}
 \end{figure}
 
 从 2000 年左右开始，云计算的概念正式形成了。2006 年诞生的 Amazon EC2 \footnote{EC2
@@ -43,6 +45,7 @@
     \centering
     \includegraphics[height=0.4\textheight]{iaas-paas-saas}
     \caption{三种服务类型，灰色部分是由平台提供商管理的部分}
+    \label{fig:iaas-paas-saas}
 \end{figure}
 
 云计算提倡的概念是“所有都是服务”
@@ -53,7 +56,9 @@
 就好像电线，终端用户就像使用电力一样使用云计算产生的计算资源。
 
 根据服务类型不同，云计算平台主要可以分为以下三种——基础设施
-服务 (IaaS)、平台服务 (PaaS) 还有软件服务 (SaaS) ~\cite{types-of-cloud}。
+服务 (IaaS)、平台服务 (PaaS) 还有软件服务 (SaaS) ~\cite{types-of-cloud}，
+它们的区别是服务提供商提供的解决方案包含的部分占整个软件栈的比例，如图
+~\ref{fig:iaas-paas-saas}所示。
 
 \subsubsection{基础设施服务}
 \label{subsubsec:iaas}
@@ -72,20 +77,24 @@
     \centering
     \includegraphics[width=\textwidth]{openstack-conceptual-diagram}
     \caption{OpenStack 的概念架构图（来自 OpenStack 官方电子手册）}
+    \label{fig:openstack-conceptual-diagram}
 \end{figure}
 
 上文提到的 Amazon EC2 就是一个典型的 IaaS 平台。类似的，OpenStack 也是一个 IaaS 平台，
-截至到 2016 年，一共包含以下几个核心组成部分~\cite{openstack}：
+如图~\ref{fig:openstack-conceptual-diagram}截至到 2016 年，一共包含以下几个核心
+组成部分~\cite{openstack}：
 
 \begin{enumerate}
     \item \textbf{Nova:} Nova 是 OpenStack 的计算部分，主要负责虚拟机管理。它的 API
     可以和 Amazon EC2 的相兼容，RackSpace 和惠普~\cite{hpe-openstack}的商业计算服务
-    就是建立在 Nova 上的。Nova 主要包含以下几个组件\footnote{实际上还有 nova-cert
-     和 nova-objectstore ，但不是主要的}：
+    就是建立在 Nova 上的，Nova 的基本架构如图~\ref{fig:openstack-nova-arch}所示。
+    Nova 主要包含以下几个组件\footnote{实际上还有 nova-cert 和 nova-objectstore ，
+    但不是主要的}：
     \begin{figure}[h]
         \centering
         \includegraphics[width=0.7\textwidth]{openstack-nova-arch}
         \caption{OpenStack Nova 的架构图}
+        \label{fig:openstack-nova-arch}
     \end{figure}
     \begin{enumerate}
         \item \textbf{nova-compute:} 这是 Nova 用来管理虚拟机的模块。它安装在物理集群
@@ -114,10 +123,12 @@
         \centering
         \includegraphics[height=0.7\textheight]{openstack-swift-arch}
         \caption{OpenStack Swift 的架构图}
+        \label{fig:openstack-swift-arch}
     \end{figure}
     \item \textbf{Swift:} Swift 项目是 OpenStack 提供的对象存储 (Object Storage)
      服务\footnote{对于程序员来说，这个概念容易和“面向对象”中的对象相混淆，前者是指在
-    云端存储的一个文件，后者是对具有一定行为特征的一类概念的抽象}。一个 IaaS 服务框架，
+    云端存储的一个文件，后者是对具有一定行为特征的一类概念的抽象}，其基本结构如图
+    ~\ref{fig:openstack-swift-arch}所示。一个 IaaS 服务框架，
     为什么要提供存储服务呢？物理世界中，一般使用存储区域网络
      (SAN) 或者网络附属存储 (NAS) 来保证数据的集中管理。在虚拟化的世界中，虚拟机数据的
     集中存储更是至关重要，因为虚拟机的临时存储好比无源之水、无本之木，随着虚拟机的删除，
@@ -129,9 +140,11 @@
         \centering
         \includegraphics[width=0.7\textwidth]{openstack-cinder-arch}
         \caption{OpenStack Cinder 的架构图}
+        \label{fig:openstack-cinder-arch}
     \end{figure}
     \item \textbf{Cinder:} Cinder 项目是 OpenStack 提供的块存储 (Block Storage)
-     机制，类似于 Amazon EBS (Elastic Block Storage) 。Cinder 提供了逻辑
+     机制，类似于 Amazon EBS (Elastic Block Storage) ，其基本结构如图
+    ~\ref{fig:openstack-cinder-arch}。Cinder 提供了逻辑
     存储卷 (volume)的抽象，举例来说，如果数据库服务在一个由 Nova 提供的虚拟机里运行，
     那么一旦虚拟机出错，存储在 Cinder 提供的逻辑存储卷里的数据库还能通过附加 (attach)
      到新的虚拟机上来很快恢复服务，不至于出现“鸡飞蛋打”的情况。从这个意义上，一个 volume
@@ -163,6 +176,7 @@ Google App Engine 就是平台即服务的典型代表。开发者通过使用 G
     \centering
     \includegraphics[width=0.7\textwidth]{gnome-google-account}
     \caption{在 Ubuntu 16.04 上的 GNOME 3.18 桌面环境登录 Google 账户}
+    \label{fig:gnome-google-account}
 \end{figure}
 
 和以上两种形式不同，软件即服务 (SaaS) 既不是面向系统建构师，也不是面向应用开发者，它是
@@ -175,7 +189,8 @@ Google Apps 是软件即服务的代表之一。Google 的网页应用程序有�
  \footnote{\url{https://hangouts.google.com}}（现在改名叫 Hangouts ）等，
 同时它们还提供 API ，使得 Google 的普通应用程序，例如 Android Gapps ，也能和
 云端的网页版应用访问相同的数据。第三方开发者也可以八仙过海，各显神通，例如新版的
- GNOME Desktop 就支持 Google 的日历、网盘同步等功能。
+ GNOME Desktop 就支持 Google 的日历、网盘同步等功能，如图
+ ~\ref{fig:gnome-google-account}所示。
 
 \subsection{虚拟化和云计算}
 
