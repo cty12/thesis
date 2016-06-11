@@ -194,13 +194,13 @@ Mongoose 和 Apache httpd 的测试结果分别如表~\ref{tab:mongoose-perf}
         FIELD & KVM & LXC & BAREMETAL \\
         \hline
         \hline
-        Time per request (ms) & 255.608 & 267.923 & 284.447 \\
+        Time per request (ms) & 255.284 & 260.869 & 276.233 \\
         \hline
-        Requests per sec & 31.3 & 29.86 & 28.12 \\
+        Requests per sec & 31.34 & 30.67 & 28.96 \\
         \hline
-        Transfer rate (KB/s) & 3.39 & 3.24 & 3.05 \\
+        Transfer rate (KB/s) & 3.4 & 3.32 & 3.14 \\
         \hline
-        Time taken (s) & 4.09 & 4.287 & 4.551 \\
+        Time taken (s) & 4.085 & 4.174 & 4.42 \\
         \hline
     \end{tabular}
     \label{tab:mongoose-perf}
@@ -214,17 +214,21 @@ Mongoose 和 Apache httpd 的测试结果分别如表~\ref{tab:mongoose-perf}
         FIELD & KVM & LXC & BAREMETAL \\
         \hline
         \hline
-        Time per request (ms) & 275.432 & 253.109 & 271.302 \\
+        Time per request (ms) & 250.991 & 245.327 & 265.69 \\
         \hline
-        Requests per sec & 29.05 & 31.61 & 29.49 \\
+        Requests per sec & 31.87 & 32.61 & 30.11 \\
         \hline
-        Transfer rate (KB/s) & 6.44 & 7.01 & 6.54 \\
+        Transfer rate (KB/s) & 7.07 & 7.23 & 6.67 \\
         \hline
-        Time taken (s) & 4.407 & 4.05 & 4.341 \\
+        Time taken (s) & 4.016 & 3.925 & 4.251 \\
         \hline
     \end{tabular}
     \label{tab:apache-perf}
 \end{table}
+
+Mongoose 中虽然 LXC 以微弱劣势不敌 KVM ，但两者的差距在 $2\%$ 左右，可以近乎认为性能
+表现相同；在 Apache httpd 的测试中，LXC 又反而以微弱的优势反超。在此项测试中，可以近似地
+认为二者表现相同。
 
 \subsubsection{存储和数据库服务}
 
@@ -239,7 +243,7 @@ Memcached、Redis 还有 Mysql 的测试情况分别如表~\ref{tab:memcached-pe
         FIELD & KVM & LXC & BAREMETAL \\
         \hline
         \hline
-        Total time (s) & 4.685 & 1.707 & 1.292 \\
+        Total time (s) & 5.315 & 1.714 & 1.134 \\
         \hline
     \end{tabular}
     \label{tab:memcached-perf}
@@ -253,37 +257,37 @@ Memcached、Redis 还有 Mysql 的测试情况分别如表~\ref{tab:memcached-pe
         FIELD (req/s) & KVM & LXC & BAREMETAL \\
         \hline
         \hline
-        PING\_INLINE & 25859.84 & 44365.57 & 49261.09 \\
+        PING\_INLINE & 29325.51 & 46382.19 & 53475.94 \\
         \hline
-        PING\_BULK & 31113.88 & 44208.66 & 50968.40 \\
+        PING\_BULK & 28352.71 & 48053.82 & 47892.72 \\
         \hline
-        SET & 26096.03 & 48030.74 & 59594.76 \\
+        SET & 25614.75 & 47460.84 & 56053.81 \\
         \hline
-        GET & 28003.36 & 54171.18 & 55834.73 \\
+        GET & 24137.10 & 46882.33 & 51387.46 \\
         \hline
-        INCR & 25284.45 & 46750.82 & 58788.95 \\
+        INCR & 30854.68 & 46838.41 & 50175.61 \\
         \hline
-        LPUSH & 26961.44 & 48123.20 & 60240.96 \\
+        LPUSH & 24384.30 & 54377.38 & 52548.61 \\
         \hline
-        RPUSH & 27300.03 & 46750.82 & 59952.04 \\
+        RPUSH & 21786.49 & 47080.98 & 59136.61 \\
         \hline
-        LPOP & 23337.22 & 46339.20 & 60024.01 \\
+        LPOP & 24289.53 & 46620.05 & 53333.33 \\
         \hline
-        RPOP & 26198.59 & 46533.27 & 59523.81 \\
+        RPOP & 25062.66 & 46882.33 & 57142.86 \\
         \hline
-        SADD & 26075.62 & 46360.68 & 58685.45 \\
+        SADD & 31104.20 & 47415.84 & 57438.25 \\
         \hline
-        SPOP & 26253.61 & 46794.57 & 57240.98 \\
+        SPOP & 27570.99 & 47014.57 & 58207.21 \\
         \hline
-        LRANGE\_100 & 28232.64 & 28320.59 & 29868.58 \\
+        LRANGE\_100 & 31466.33 & 27979.86 & 29291.15 \\
         \hline
-        LRANGE\_300 & 12992.08 & 10736.53 & 12729.12 \\
+        LRANGE\_300 & 12802.46 & 11087.70 & 12597.63 \\
         \hline
-        LRANGE\_500 & 9095.04 & 8318.78 & 9489.47 \\
+        LRANGE\_500 & 9324.01 & 8588.11 & 9441.09 \\
         \hline
-        LRANGE\_600 & 7808.23 & 7190.62 & 7487.27 \\
+        LRANGE\_600 & 7763.37 & 7290.76 & 7421.15 \\
         \hline
-        MSET (10 keys) & 23691.07 & 42936.88 & 57903.88 \\
+        MSET (10 keys) & 20846.36 & 44306.60 & 57372.34 \\
         \hline
     \end{tabular}
     \label{tab:redis-perf}
@@ -297,13 +301,18 @@ Memcached、Redis 还有 Mysql 的测试情况分别如表~\ref{tab:memcached-pe
         FIELD & KVM & LXC & BAREMETAL \\
         \hline
         \hline
-        Total time (s) & 4.2884 & 4.0552 & 3.9215 \\
+        Total time (s) & 3.8928 & 4.3085 & 3.856 \\
         \hline
-        Response time (ms) & 336.99 & 315.09 & 307.25 \\
+        Response time (ms) & 302.95 & 334.7 & 303.03 \\
         \hline
     \end{tabular}
     \label{tab:mysql-perf}
 \end{table}
+
+Memcached 中 LXC 的表现非常优秀，相较 KVM 节省了 $67.8\%$ 的总时间，以至于接近裸机的
+表现；Redis 测试也是 LXC 明显占优，有的测试项目中甚至请求数达到了 KVM 的一倍；Mysql 测试
+中，LXC 以 $10\%$ 左右的劣势落后于 KVM ，但是这个劣势相对于前两项对 KVM 的优势来说是
+非常微小的。
 
 \subsubsection{解压缩}
 
@@ -317,21 +326,29 @@ tar/xz 的测试结果如表~\ref{tab:tar-xz-perf}所示：
         FIELD & KVM & LXC & BAREMETAL \\
         \hline
         \hline
-        Real (s) & 17.901 & 26.646 & 16.518 \\
+        Real (s) & 16.195 & 21.424 & 16.948 \\
         \hline
-        User (s) & 11.331 & 11.065 & 11.025 \\
+        User (s) & 11.509 & 11.053 & 11.167 \\
         \hline
-        Sys (s) & 6.106 & 5.857 & 5.477 \\
+        Sys (s) & 4.642 & 5.932 & 5.493 \\
         \hline
     \end{tabular}
     \label{tab:tar-xz-perf}
 \end{table}
 
+这项测试中 LXC 以 $30\%$ 左右的劣势落后于 KVM 。
+
 \subsection{小结}
 
-在上述几个实验中，除了 Mongoose 和 Tar/xz 两项，LXC 都相较于 QEMU-KVM 有性能优势。
-当然，KVM 是虚拟机管理程序中非常高效的一种，它是完全利用硬件虚拟化的。LXC 虚拟容器能
-在多数指标上优于 KVM ，证明虚拟容器技术有自己的优势。
+LXC 虚拟容器在 Web 服务测试中和 KVM 表现非常接近，而且它们的性能都接近裸机，性能很好；
+在存储和数据库应用中，LXC 有非常明显的优势，KVM 性能表现不佳；而在解压缩测试中，LXC
+反而有劣势，但是劣势不如存储应用中对 KVM 的优势明显。
+
+当然，QEMU-KVM 与 GNU/Linux 内核结合紧密，已经是一种非常非常高效的虚拟化方案了，
+据现就职于 Rackspace 的工程师 Major Hayden 在 2014 年进行的测试，KVM 几乎在每个项目中
+击败了 Xen （当然 Xen 本身也是一种非常高效的虚拟机管理程序）。LXC 虚拟容器技术甚至能在一些
+测试中击败 KVM ，证明它有自己的优势。在 Tsinghua NOVA 系统中，我们正是要将二者的优势结合
+起来，取长补短，构建混合的云集群。这样才能最好地发挥现今不同虚拟化技术在不同应用场景下的优势。
 
 \section{调度性能评估}
 
