@@ -370,6 +370,29 @@ Dell PowerEdge R720
 两者的网关，从节点不运行防火墙，主节点运行 iptables 服务作为防火墙，关闭了 CentOS 默认
 使用的 firewalld 。从节点所有 IPV4 流量需要经过主节点转发。
 
+\subsection{创建客户机开销}
+
+通过主节点 (master node) 和从节点 (worker node) 的日志分析创建客户机的性能开销：
+
+\begin{lstlisting}
+2016-06-11 18:31:38,388: entering create vnode handler
+2016-06-11 18:31:38,388: hypervisor to be created: lxc
+2016-06-11 18:31:38,615: Pnode ip addr: 192.168.7.102
+2016-06-11 18:31:38,626: nfs base dir: /home/export/Nova_home/run
+2016-06-11 18:31:38,627: extract cmd: tar -C /home/export/Nova_home/run/testlxc8 -xf /home/export/Nova_home/run/fedora-archive-criu-tmux.tar
+\end{lstlisting}
+
+\begin{lstlisting}
+2016-06-11 18:31:40,780: entering start vnode handler
+2016-06-11 18:31:40,781: using nfs as storage protocol
+2016-06-11 18:31:40,781: hypervisor to start: lxc:///
+2016-06-11 18:31:41,305: domain name: testlxc8; id: 22641
+2016-06-11 18:31:41,306: uuid: ae5fc3ae-10a9-454a-932d-4c5114125fcd; vncport: null
+\end{lstlisting}
+
+可以看出，不到 3 秒集群完成了整个客户机的创建工作，其中，展开文件系统与 RPC 只花费了 2 秒，
+可以说客户机创建过程性能是令人满意的。
+
 \subsection{迁移开销}
 
 在迁移的实验中，我们使用理想化的负载 toy.py ，它的作用是不断把内存中的一个计数变量写入磁盘
@@ -389,7 +412,26 @@ while(True):
     time.sleep(10)
 \end{lstlisting}
 
-通过在 Tsinghua NOVA 系统中打印日志的形式进行测量。一次运行的结果如下：
+测试迁移开销的方法是通过输出日志的方式。日志是通过 log4j 打印在 \$NOVA\_HOME/data/log 中
+的相应的 log 文件的。
+
+\subsubsection{非实时迁移的开销}
+
+一次非实时迁移 (offline migration) 的结果如下：
+
+\begin{lstlisting}
+2016-06-10 23:27:57,606: uuid of domain to migrate is b2aebf27-1b30-4f81-a4cf-62c6682409c9
+2016-06-10 23:27:57,606: migration type: offline
+2016-06-10 23:28:00,329: dst domain created.
+2016-06-10 23:28:00,329: send back migration complete message to master!
+2016-06-10 23:28:00,331: migration completed. check process on destination.
+\end{lstlisting}
+
+可以看出，非实时迁移，也就是离线迁移是非常快的，整个过程的开销不到 3 秒。
+
+\subsubsection{实时迁移的开销}
+
+一次实时迁移 (live migration) 的结果如下：
 
 \begin{lstlisting}
 2016-05-05 21:08:43,693: uuid of domain to migrate is 30680a29-215a-48a6-b728-5643fb7d7dc7
@@ -405,5 +447,11 @@ while(True):
 可以看出，在源宿主机上的虚拟容器中 checkpoint 负载进程需要大约 10 秒，而在目标宿主机上
 迁移过后的虚拟容器中 restore 负载进程需要 27 秒左右。整个过程存在大约 40 秒的开销。
 
-% TODO 在这里测量一下创建虚拟机的开销
-% TODO 和 KVM 的作对比
+\section{小结}
+
+通过上述的比较可以看出，虚拟容器技术和传统虚拟化的新秀 QEMU-KVM 的性能表现可以说各有千秋，
+而 Tsinghua NOVA 系统可以创建二者混合的集群，这样可以扬长避短，发挥二者各自的优势——如果
+该应用程序的类型被基准测试程序 Omegabench 验证过在典型负载下适合在 LXC 中运行，那么就使用
+LXC 作为下层的虚拟化方案，如果反之，是在 QEMU-KVM 里效果更好，那么就使用 KVM 作为下层的
+虚拟化方案。而采用不同虚拟化方案产生的客户机被 Tsinghua NOVA 使用透明的方式呈现给客户，
+并没有增加用户的使用和学习成本。
