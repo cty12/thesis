@@ -47,6 +47,8 @@ SuperPI 。在实际应用中，恐怕没有用户会每天使用计算机无穷
 
 在这一小节，我们说明本次实验对于 LXC 与 KVM 两种虚拟化平台的配置是公平的。
 
+\subsubsection{通过 cgroup 对 LXC 做资源限制}
+
 在 LXC 虚拟容器中，我们通过修改容器的配置文件来对其进行内存的配额限制。在
 ~\ref{subsubsec:cgroup}小节提到过，现代的 Linux 内核可以通过 cgroup 进行进程组的资源
 调配，所以在这里，我们就要修改 cgroup 的相关参数。
@@ -79,11 +81,45 @@ cgfs.c:do_setup_cgroup_limits:1926 - cgroup has been setup
 10737418240
 \end{lstlisting}
 
-可见，此时该虚拟容器 test-fedora-1 的内存资源已得到了限制。使用类似的方法可以对 CPU 数量
-等关键参数进行设置，在本次实验中，因为 LXC 与 KVM 的性能测试是先后而不是同时运行，所以二者
-的设置都是使用宿主机全部的 CPU 个数。
+可见，此时该虚拟容器 test-fedora-1 的内存资源已得到了限制。
 
-% TODO 增加 KVM 的限制方法
+使用类似的方法可以对 CPU 数量等关键参数进行设置。在本次实验中，因为 LXC 与 KVM 的性能测试是
+先后而不是同时运行，所以二者的设置都是使用宿主机全部的 CPU 个数。
+
+\subsubsection{对 QEMU-KVM 进行资源限制}
+
+KVM 有数量众多的前端工具，比如命令行的 virsh (Virtual Shell) 和图形界面的 virt-manager
+。我们使用 Red Hat 自家的 GNOME Boxes 作为前端来配置 KVM 的客户虚拟机，这也是 RHEL/CentOS
+的默认方案。
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.7\textwidth]{gnome-boxes-config}
+    \caption{通过 GNOME Boxes 配置客户虚拟机}
+    \label{fig:gnome-boxes-config}
+\end{figure}
+
+如图~\ref{fig:gnome-boxes-config}所示，通过图形界面能简单地配置内存和处理器的配额。
+通过 virsh dominfo 命令可以进行查看：
+
+\begin{lstlisting}
+$ virsh dominfo fedora22-wor
+Id:             3
+Name:           fedora22-wor
+UUID:           3fe3e047-aa2e-4280-90d4-97c0816e3529
+OS Type:        hvm
+State:          running
+CPU(s):         8
+CPU time:       305743.4s
+Max memory:     8373248 KiB
+Used memory:    8373184 KiB
+Persistent:     yes
+Autostart:      disable
+Managed save:   no
+Security model: selinux
+Security DOI:   0
+Security label: unconfined_u:unconfined_r:svirt_t:s0:c355,c485 (enforcing)
+\end{lstlisting}
 
 \subsection{运行本测试套件}
 
