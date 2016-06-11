@@ -232,22 +232,8 @@ Mongoose 中虽然 LXC 以微弱劣势不敌 KVM ，但两者的差距在 $2\%$ 
 
 \subsubsection{存储和数据库服务}
 
-Memcached、Redis 还有 Mysql 的测试情况分别如表~\ref{tab:memcached-perf}、
-~\ref{tab:redis-perf}还有~\ref{tab:mysql-perf}所示：
-
-\begin{table}[H]
-    \centering
-    \caption{Memcached 的性能测试结果}
-    \begin{tabular}{||c c c c||}
-        \hline
-        FIELD & KVM & LXC & BAREMETAL \\
-        \hline
-        \hline
-        Total time (s) & 5.315 & 1.714 & 1.134 \\
-        \hline
-    \end{tabular}
-    \label{tab:memcached-perf}
-\end{table}
+Redis 、Memcached 还有 Mysql 的测试情况分别如表~\ref{tab:redis-perf}、
+~\ref{tab:memcached-perf}还有~\ref{tab:mysql-perf}所示：
 
 \begin{table}[H]
     \centering
@@ -291,6 +277,20 @@ Memcached、Redis 还有 Mysql 的测试情况分别如表~\ref{tab:memcached-pe
         \hline
     \end{tabular}
     \label{tab:redis-perf}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \caption{Memcached 的性能测试结果}
+    \begin{tabular}{||c c c c||}
+        \hline
+        FIELD & KVM & LXC & BAREMETAL \\
+        \hline
+        \hline
+        Total time (s) & 5.315 & 1.714 & 1.134 \\
+        \hline
+    \end{tabular}
+    \label{tab:memcached-perf}
 \end{table}
 
 \begin{table}[H]
