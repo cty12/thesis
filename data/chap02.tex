@@ -29,6 +29,7 @@
     \centering
     \includegraphics[width=0.7\textwidth]{qemu-arch}
     \caption{QEMU 的基本结构}
+    \label{fig:qemu-arch}
 \end{figure}
 
 和 Bochs 不同，QEMU 不仅能模拟 X86 架构的处理器，还能支持 ARM / MIPS / PowerPC
@@ -38,7 +39,7 @@
 比如一个基本块 (basic block) ，然后翻译并缓存 (caching)翻译好的目标代码。
 这样的好处是二进制程序只在需要的时候被翻译，比如一个循环，执行一次之后
 又跳转回到和一开始相同的代码，那么只需要指向缓存中已经翻译好的代码就可以了，
-而不用重新翻译一遍。
+而不用重新翻译一遍。QEMU 的基本结构如图~\ref{fig:qemu-arch}所示。
 
 当然 Valgrind 本质上是一个检查内存错误的 memcheck 工具，这是它和 QEMU 根本上的不同。
 如果模拟器工作在纯软件模拟，执行效率是不高的，但是好处是理论上可以模拟任何硬件，
@@ -91,12 +92,14 @@ Xen 解决越级指令的办法，是将客户虚拟机的内核放在 Ring 1 �
 只使用 Ring 0 执行内核代码和 Ring 3 执行用户态代码。符合这个条件的操作系统，
 比如 GNU/Linux 、Windows XP 和 BSD \footnote{在 2003 年的 Xen 1.0 版本中，
 事实上只有 GNU/Linux 内核是基本工作正常的，Windows 支持做了一部分，
-NetBSD 则几乎不能工作}，理论上都可以被移植 (port) 到 Xen 上。
+NetBSD 则几乎不能工作}，理论上都可以被移植 (port) 到 Xen 上。Xen 的基本结构如
+图~\ref{fig:xen-arch}所示。
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.8\textwidth]{xen-arch}
     \caption{Xen 的架构}
+    \label{fig:xen-arch}
 \end{figure}
 
 那么 Xen 是如何解决性能问题的呢？通常来讲，两种异常 (exception)的频繁发生会显著
@@ -119,8 +122,9 @@ Xen 使用了 X86 架构的特性，但是它还是软件实现的，并没有�
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.7\textwidth]{segment-selectors.png}
+    \includegraphics[width=0.7\textwidth]{segment-selectors}
     \caption{X86 的段寄存器}
+    \label{fig:segment-selectors}
 \end{figure}
 
 \begin{table}[h]
@@ -155,7 +159,7 @@ Xen 使用了 X86 架构的特性，但是它还是软件实现的，并没有�
 
 \begin{itemize}
     \item 客户机操作系统可以观察到自己处于非特权状态。X86 的代码段寄存器 CS 的最低两位存储的
-    就是当前的特权级 (CPL, current privilege level)；
+    就是当前的特权级 (CPL, current privilege level)，如图~\ref{fig:segment-selectors}；
     \item 当特权指令运行在非特权模式，也就是用户态 (user-level) 的时候，缺乏相应的陷入。
     我们知道，X86 里的 FLAGS 寄存器一共有 16 位，参见表~\ref{table:flags-x86}。
     如果运行特权指令 popf 的话，那么控制ALU 的 ZF 位和控制系统的 IF 位
@@ -177,13 +181,15 @@ Intel 的 VT 和 AMD 的 AMD-V 技术对 X86 的结构做出了一些扩展，�
 
  \begin{figure}[h]
      \centering
-     \includegraphics[width=0.7\textwidth]{qemu-kvm-arch.png}
+     \includegraphics[width=0.7\textwidth]{qemu-kvm-arch}
      \caption{QEMU-KVM 的架构示意}
+     \label{fig:qemu-kvm-arch}
  \end{figure}
 
 一些新兴的虚拟机管理程序必须要求宿主机支持硬件虚拟化技术，比如开源内核的模块 KVM ，它和 QEMU
-结合紧密，由 QEMU 提供模拟的硬件设备，所以一般称为 QEMU-KVM 。KVM 技术和 Linux 内核结合
-较好，又天生支持硬件虚拟化，还有商业公司 Red Hat 提供技术支持，可以说是虚拟化界的新秀。
+结合紧密，由 QEMU 提供模拟的硬件设备，所以一般称为 QEMU-KVM ，其结构如图
+~\ref{fig:qemu-kvm-arch}。KVM 技术和 Linux 内核结合较好，又天生支持硬件虚拟化，还有
+商业公司 Red Hat 提供技术支持，可以说是虚拟化界的新秀。
 
 \subsection{容器虚拟化}
 

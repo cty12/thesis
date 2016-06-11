@@ -167,7 +167,8 @@ NFS (Network File System) 是一种完全开放的分布式文件系统标准，
 在之前的章节~\ref{subsubsec:network-storage}，
 我们介绍了 Linux 虚拟容器的文件系统存储结构以及 Tsinghua NOVA 管理系统使用的网络存储
 方案。在这一节，介绍 Tsinghua NOVA 系统是如何利用前面介绍的相关工具的特点实现 Linux
-虚拟容器客户机操作系统的自动部署和启动的。
+虚拟容器客户机操作系统的自动部署和启动的，其主要流程在图~\ref{fig:create-vnode}中
+展示出来。
 
 \subsubsection{根文件系统的展开}
 \label{subsubsec:deployment-rootfs}
@@ -207,6 +208,7 @@ Tsinghua NOVA 系统在运行过程中实现了一个动态调度特性\footnote
     \centering
     \includegraphics[width=0.9\textwidth]{create-vnode}
     \caption{创建虚拟容器的工作流程}
+    \label{fig:create-vnode}
 \end{figure}
 
 虽然 Tsinghua NOVA 系统会通过 RPC 通知相应的从节点新的虚拟容器应该被创建，但是解压缩
@@ -221,11 +223,13 @@ HTTP server 是跑在主节点上的，也就是说，用户在网页端发出�
     \centering
     \includegraphics[width=0.7\textwidth]{image-manager}
     \caption{Tsinghua NOVA 的镜像管理界面}
+    \label{fig:image-manager}
 \end{figure}
 
 在这个系统中，容器的基镜像被存储在 \$NOVA\_HOME/run/run 目录，这个目录是从主节点上的某个
 目录\footnote{例如在我们的测试系统中是 /home/export，但是这个没有关系}挂载过来的，无论
-主节点从节点都是如此，我们称被挂载的目录为 NFS 基目录 (NFS base directory) 。而每个
+主节点从节点都是如此，我们称被挂载的目录为 NFS 基目录 (NFS base directory) 。
+用户通过镜像页面管理所有在数据库注册的操作系统镜像，如图~\ref{fig:image-manager}。而每个
 运行着的虚拟容器都保存着一份自己独立的文件系统，在容器部署之初，是由相应的基文件系统的压缩包
 直接解压过来的。同时，在每个容器自己的目录下还保存着一个 XML 文件包含了一些资源的定义，这个
 文件将在下一节详细介绍。例如名字是 testlxc 的虚拟容器它的目录就是 \$NOVA\_HOME/run/run/
@@ -249,6 +253,7 @@ conf.xml ，在这一小节，具体讲解这个配置文件的来龙去脉。
     \centering
     \includegraphics[width=0.4\textwidth]{guest-config-dialog}
     \caption{客户虚拟机配置界面}
+    \label{fig:guest-config-dialog}
 \end{figure}
 
 首先要强调，这个配置文件是使用 libvirt 管理 LXC 所需要的，如果使用 LXC 自己的用户态工具，
@@ -308,7 +313,7 @@ virsh -c lxc:/// domxml-from-native lxc-tools /var/lib/lxc/testlxc/config
     称为一个域，域是 libvirt 管理的基本单位}的类型，如果是 LXC 就是 lxc ，如果是
     QEMU-KVM 就是 kvm ；
     \item \textbf{name:} 这个域的名称。在 Tsinghua NOVA 系统里，名称可以由用户
-    在网页的对话框里指定；
+    在网页的对话框里指定，如图~\ref{fig:guest-config-dialog}；
     \item \textbf{uuid:} 是一个域的通用唯一识别码。在 Tsinghua NOVA 里是自动生成的；
     \item \textbf{memory:} 对虚拟机内存的限制；具体到我们关心的 LXC 来说，就是通过
     ~\ref{subsubsec:cgroup}小节提到的 cgroup 控制组技术限制运行在虚拟容器中的进程组
@@ -359,10 +364,12 @@ Tsinghua NOVA 平台在设计的时候，一个很重要的特性就是对虚拟
     \centering
     \includegraphics[width=0.6\textwidth]{migration-managed-direct}
     \caption{Libvirt managed direct migration}
+    \label{fig:migration-managed-direct}
 \end{figure}
 
 LXC 和 KVM 的迁移的主要区别是到目前为止 libvirt 没有一个较好的对 LXC 的原生迁移 (native
  migration) 的实现，而这一点对于 KVM 是有的。这也让 KVM 的迁移实现起来毫无难度。
+libvirt 管理的迁移流程如图~\ref{fig:migration-managed-direct}。
 
 在命令行下使用 libvirt 的 shell 工具 virsh 进行迁移的实例如下，其中 test-migrate 是
 客户虚拟机的名字、desthost 是目标宿主机的主机名 (hostname) ：
@@ -627,7 +634,9 @@ passwd=940715
     \centering
     \includegraphics[width=0.8\textwidth]{vnode-status}
     \caption{获取虚拟机状态的基本流程}
+    \label{fig:vnode-status}
 \end{figure}
 
 原理还是使用~\ref{subsubsec:cr-automation}小节介绍的 nova-vmaddrctl 脚本从 ARP 缓存中读取 IP
 地址。然后采用 RPC 的方式传回主节点更新数据库中的虚拟节点信息。
+整个流程图如图~\ref{fig:vnode-status}所示。
