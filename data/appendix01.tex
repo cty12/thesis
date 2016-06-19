@@ -532,8 +532,7 @@ UMLinux 的性能的工作正在进行。尽管 Plex86 本来是一个通用的 
 但是这项功能被关闭了因为这些内核目前都不具备支持 SMT 的调度器。我们保证每台客户机加上它们的
 虚拟机管理程序的总内存与 Linux 裸机的内存数量相等。
 
-RedHat 7.2 \footnote{时光飞逝，在正文部分我们的实验也是在 7.2 版本上进行的。
-但是是 RedHat Enterprise Linux 7.2 的社区版本，和这篇译文中的 RedHat 7.2 完全是两个版本——译者注}
+RedHat 7.2 \footnote{在正文部分我们的实验也是在 7.2 版本上进行的，但是是 RHEL 7.2——译者注}
 是我们始终使用的发行版，在 ext3 文件系统上安装。VM 被配置在 persistent raw mode 模式下
 使用相同的磁盘分区，以达到最好的性能。使用相同的文件系统镜像还消除了磁盘寻道时间和传输速率的
 潜在的差别。
@@ -544,6 +543,11 @@ RedHat 7.2 \footnote{时光飞逝，在正文部分我们的实验也是在 7.2 
 层的基准测试被用来描述系统在一系列服务器类型的负载下的性能表现。既然 Xen 和 VMWare 任一款产品
 当前都还不支持多处理器的客户操作系统，测试机被配置只使用一个处理器，我们之后再测试并行的客户
 操作系统的性能。测试结果是多次测试取得的中位数。
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{relative-perf-xen}
+\end{figure}
 
 图 3 中的第一族条形代表了一个对虚拟机管理程序相对“轻松”的场景。SPEC CPU 测试集包含了一系列
 长时间运行的计算密集型应用以测量系统处理器、内存和编译器质量的性能表现。这个测试集进行的 I/O
@@ -597,6 +601,11 @@ SPEC WEB99 测试整个系统。在测量阶段有高达 180Mb/s 的 TCP 网络�
 包含了 37 个微测试程序。在原生 Linux 的情况下，我们既提供了单处理器 (L-UP) 的图表，也提供了
 SMP 内核 (L-SMP) 的图表，因为我们对 SMP 系统在很多情况下的额外的锁带来的性能开销感到非常惊讶。
 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{lmbench-tables}
+\end{figure}
+
 在 37 个微测试程序中的 24 个里，XenoLinux 的性能表现都和原生 Linux 接近，和单处理器的内核
 非常接近，比 SMP 内核要好。在表 3 ~ 5 中，我们展示了测试系统中有意思的性能差异，Xen 特别明显
 的性能缺陷使用粗体显示出来。
@@ -627,6 +636,11 @@ SMP 内核 (L-SMP) 的图表，因为我们对 SMP 系统在很多情况下的�
 接收的 socket 缓冲区都设置为 128KB 的大小，因为我们发现这时候性能最好。测试结果是 9 组
 分别传输 400MB 的实验的中位数。
 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{ttcp-table}
+\end{figure}
+
 表 6 展示了两组测试结果，一组使用默认的以太网 MTU 也就是 1500 bytes ，另一组使用 500 byte
 的 MTU （这个值被拨号的 PPP 客户端广泛使用）。结果显示 XenoLinux 的虚拟网络驱动使用的
 page-flipping 技术避免了数据拷贝的开销，因此取得了非常低的每字节开销。当 MTU 值是
@@ -642,7 +656,12 @@ VMWare 模拟了一块 pcnet32 网卡来和客户虚拟机进行通讯，它提�
 在这一小节中，我们将在客户操作系统中运行多个应用程序的性能和直接在裸硬件上运行它们的性能做比较。
 我们的重点是使用 Xen 得到的那些结果，但是当恰当的时候我们我们也会评价其它虚拟机管理程序的性能。
 
-表 4 展示了在一台两 CPU 的机器上并行运行 1、2、4、8 和 16 份的 SPEC WEB99 基准测试程序的
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{spec-web99}
+\end{figure}
+
+图 4 展示了在一台两 CPU 的机器上并行运行 1、2、4、8 和 16 份的 SPEC WEB99 基准测试程序的
 结果。原生 Linux 配置使用了 SMP ，在其上我们并行运行多份 Apache 。在 Xen 的情况下，
 每个 SPEC WEB99 的测试实例被运行在自己的单处理器 Linux 客户操作系统中（当然里面还有 sshd
 等管理用的进程），每个 web 服务器使用了不同的 TCP 端口号以保证每份程序都可以并行执行。注意到
@@ -666,6 +685,11 @@ VMWare 模拟了一块 pcnet32 网卡来和客户虚拟机进行通讯，它提�
 数据库。但是这么做就不能使不同用户使用独自的数据库设置。我们使用了 chroot 和软件补丁的组合
 来避免在不同的 PostgreSQL 实例之间的 SysV IPC 的命名空间的冲突。作为对比，Xen 允许每个实例
 在自己的域中运行从而实现了易用的配置。
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{osdb}
+\end{figure}
 
 在图 5 中我们展示了 Xen 在运行 1、2、4、8 个 OSDB-IR 和 OSDB-OLTP 实例时取得的叠加吞吐率。
 当加入了第二个域，对于第二块 CPU 的完整的使用几乎使得总吞吐率翻番了。继续增加域的数量导致叠加
