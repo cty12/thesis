@@ -229,7 +229,8 @@ HTTP server 是跑在主节点上的，也就是说，用户在网页端发出�
 在这个系统中，容器的基镜像被存储在 \$NOVA\_HOME/run/run 目录，这个目录是从主节点上的某个
 目录\footnote{例如在我们的测试系统中是 /home/export，但是这个没有关系}挂载过来的，无论
 主节点从节点都是如此，我们称被挂载的目录为 NFS 基目录 (NFS base directory) 。
-用户通过镜像页面管理所有在数据库注册的操作系统镜像，如图~\ref{fig:image-manager}。而每个
+用户通过镜像页面管理所有在数据库注册的操作系统镜像，如图~\ref{fig:image-manager}
+\footnote{浏览器是 Google Chrome 51 ，客户端操作系统是 Fedora Workstation 23}。而每个
 运行着的虚拟容器都保存着一份自己独立的文件系统，在容器部署之初，是由相应的基文件系统的压缩包
 直接解压过来的。同时，在每个容器自己的目录下还保存着一个 XML 文件包含了一些资源的定义，这个
 文件将在下一节详细介绍。例如名字是 testlxc 的虚拟容器它的目录就是 \$NOVA\_HOME/run/run/
