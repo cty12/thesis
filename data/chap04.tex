@@ -641,3 +641,24 @@ passwd=940715
 原理还是使用~\ref{subsubsec:cr-automation}小节介绍的 nova-vmaddrctl 脚本从 ARP 缓存中读取 IP
 地址。然后采用 RPC 的方式传回主节点更新数据库中的虚拟节点信息。
 整个流程图如图~\ref{fig:vnode-status}所示。
+
+\section{新的集群概览界面}
+
+在改进之后，集群概览 (Overview) 页面相比原来有了比较大的进步。原有的页面虽然能显示一定的信息
+，但是既不够直观，也不够美观。在新版本中，我们将前端样式 CSS 框架 Bootstrap 迁移到最新的
+3.3.6 版本，jQuery 也迁移到 2.2.4 版本，这样可以利用它们的一些新特性。
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{overview-panel}
+    \caption{Tsinghua NOVA 的集群概览页面}
+    \label{fig:overview-panel}
+\end{figure}
+
+如图~\ref{fig:overview-panel}所示，左侧第一栏展示了目前数据库中的用户信息，和每个特权级
+用户的权限情况，NOVA 是一个多用户系统，每个用户组有不同的权限；第二栏展示了集群中的物理机信息，
+包括物理节点总数，目前活跃的和宕机的节点数量，如果主节点无法连接到从节点，那么主节点就会认为
+从节点已经宕机；第三栏展示了虚拟节点信息，包括客户机的数量，和虚拟集群的数量。
+
+通过这个页面，终端用户，也就是集群的系统管理员可以直观地查看集群的状态，从而做出相应的维护性
+操作。
