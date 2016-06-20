@@ -6,6 +6,7 @@
 虚拟化平台上运行同样的模仿真实环境的负载，对不同虚拟化方案的效果和实用性作出评估。
 
 \subsection{实验环境}
+\label{subsec:experiment-setup}
 
 实验使用的硬件是一台清华同方“超强”系列的塔式服务器，型号是 TP-240 。具体配置如下：
 
@@ -17,7 +18,10 @@ Tsinghua-Tongfang TP-240 tower server
 \end{lstlisting}
 
 宿主机使用的操作系统是 CentOS 7.2 ，也就是目前最新的版本。相应的软件栈也在实验之前更新
-到 Red Hat EPEL 软件仓库中的最新版本。
+到 Red Hat EPEL 软件仓库中的最新版本。客户机，无论是虚拟容器中的还是 KVM 虚拟机中的，
+都运行的是相同版本的 Fedora 22 操作系统，在运行实验之前，从 Fedora 官方源更新全部的
+软件包以保证它们使用的软件依赖版本相同。开发使用的工作站是一台最新的 Dell Optiplex 7040
+微型机，运行的是 Fedora 23 ，JRE/JDK 版本是 Oracle Java 7 Update 79 。
 
 \subsection{负载类型的选择}
 
@@ -369,6 +373,8 @@ Dell PowerEdge R720
 其中一台作为主节点 (master node) ，另外两台作为从节点 (slave node) 。主节点还作为另外
 两者的网关，从节点不运行防火墙，主节点运行 iptables 服务作为防火墙，关闭了 CentOS 默认
 使用的 firewalld 。从节点所有 IPV4 流量需要经过主节点转发。
+
+相关的操作系统版本和~\ref{subsec:experiment-setup}小节介绍的相同，在这里不再赘述。
 
 \subsection{创建客户机开销}
 
